@@ -12,6 +12,8 @@ assistant.log
 *.log
 
 gmail_credentials.json
+data/gmail_credentials.json
+gmail_token.json
 data/gmail_token.json
 data/memory.json
 
