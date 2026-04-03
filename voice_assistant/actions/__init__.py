@@ -1,14 +1,15 @@
-from .app_actions import open_app
-from .file_actions import create_file, read_file
-from .web_actions import search_web
+from .app_actions import calculate, open_app, open_target, write_in_app
+from .file_actions import create_file
+from .web_actions import browse
 from .code_actions import write_code
-from .email_actions import send_email
 
 __all__ = [
+    "calculate",
+    "browse",
     "open_app",
-    "create_file",
-    "read_file",
-    "search_web",
+    "open_target",
+    "write_in_app",
     "write_code",
-    "send_email"
+    "create_file",
+    "write_code",
 ]

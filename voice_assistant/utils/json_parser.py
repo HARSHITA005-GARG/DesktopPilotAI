@@ -10,13 +10,21 @@ def parse_json_response(json_string):
     Returns: dict with 'action' and 'parameters' keys
     """
     try:
-        data = json.loads(json_string)
+        if isinstance(json_string, dict):
+            data = dict(json_string)
+        else:
+            data = json.loads(json_string)
         
         if "action" not in data:
             raise ValueError("Missing 'action' key in JSON response")
-        
-        if not isinstance(data.get("parameters"), dict):
-            data["parameters"] = {}
+
+        parameters = data.get("parameters")
+        if isinstance(parameters, dict):
+            normalized = {"action": data["action"], **parameters}
+            for key, value in data.items():
+                if key not in {"action", "parameters"}:
+                    normalized[key] = value
+            data = normalized
         
         logger.debug(f"Parsed JSON: {data}")
         return data
