@@ -1,0 +1,389 @@
+2026-04-04 00:01:01 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:01:09 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'excel', 'content': 'Sample Data\nName,Age,Location\nJohn,25,New York\nAlice,30,Los Angeles\nBob,28,Chicago', 'window_title': 'Excel'}
+2026-04-04 00:01:09 - actions.app_actions - INFO - Opening application: excel
+2026-04-04 00:01:10 - actions.app_actions - INFO - Successfully opened excel
+2026-04-04 00:01:15 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:01:15 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened excel and wrote the requested content.'}
+2026-04-04 00:01:15 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:01:16 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:01:23 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:01:37 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'Excel', 'content': 'Name\tAge\tLocation\nJohn\t25\tNew York\nAlice\t30\tLos Angeles\nBob\t35\tChicago', 'window_title': 'Sample Data'}
+2026-04-04 00:01:37 - actions.app_actions - INFO - Opening application: Excel
+2026-04-04 00:01:37 - actions.app_actions - INFO - Successfully opened Excel
+2026-04-04 00:01:41 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:01:41 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened Excel and wrote the requested content.'}
+2026-04-04 00:01:42 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:01:42 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:01:46 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:01:55 - action_executor - INFO - Executing action: open with parameters: {'target': 'powerpoint'}
+2026-04-04 00:01:55 - actions.app_actions - INFO - Opening application: powerpoint
+2026-04-04 00:01:55 - actions.app_actions - INFO - Successfully opened powerpoint
+2026-04-04 00:01:55 - action_executor - INFO - Action completed: open
+2026-04-04 00:01:55 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened powerpoint'}
+2026-04-04 00:01:55 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:01:55 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:02:00 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:02:08 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'powerpoint', 'content': 'Final Year Project Presentation\n\nSlide 1: Introduction\nSlide 2: Problem Statement\nSlide 3: Methodology\nSlide 4: Results\nSlide 5: Conclusion', 'window_title': 'Final Year Project'}
+2026-04-04 00:02:08 - actions.app_actions - INFO - Opening application: powerpoint
+2026-04-04 00:02:08 - actions.app_actions - INFO - Successfully opened powerpoint
+2026-04-04 00:02:13 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:02:13 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened powerpoint and wrote the requested content.'}
+2026-04-04 00:02:13 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:02:13 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:02:22 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:02:35 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'powerpoint', 'content': 'Final Year Project', 'window_title': 'Final Year Project Presentation'}
+2026-04-04 00:02:35 - actions.app_actions - INFO - Opening application: powerpoint
+2026-04-04 00:02:35 - actions.app_actions - INFO - Successfully opened powerpoint
+2026-04-04 00:02:40 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:02:40 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened powerpoint and wrote the requested content.'}
+2026-04-04 00:02:41 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:02:41 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:02:47 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:04:01 - __main__ - INFO - Aura voice style configured with voice hint 'zira', style 'warm, natural, expressive', emotion 'gentle, friendly, confident'
+2026-04-04 00:04:11 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:04:19 - action_executor - INFO - Executing action: open with parameters: {'target': 'VS Code'}
+2026-04-04 00:04:19 - actions.app_actions - INFO - Opening application: VS Code
+2026-04-04 00:04:19 - actions.app_actions - INFO - Successfully opened VS Code
+2026-04-04 00:04:19 - action_executor - INFO - Action completed: open
+2026-04-04 00:04:19 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened VS Code'}
+2026-04-04 00:04:20 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:04:20 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:04:26 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:04:40 - action_executor - INFO - Executing action: write_code with parameters: {'target': 'agent.py', 'content': 'class SimpleAgent:\n    def __init__(self):\n        self.memory = {}\n    def remember(self, key, value):\n        self.memory[key] = value\n    def recall(self, key):\n        return self.memory.get(key)\n'}
+2026-04-04 00:04:40 - actions.code_actions - INFO - Wrote code file: D:\DesktopPilotAI\data\code\agent.py
+2026-04-04 00:04:40 - action_executor - INFO - Action completed: write_code
+2026-04-04 00:04:40 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\code\\agent.py', 'file_path': 'D:\\DesktopPilotAI\\data\\code\\agent.py'}
+2026-04-04 00:04:40 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:04:40 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:04:47 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:04:57 - action_executor - INFO - Executing action: write_code with parameters: {'target': 'agent.py', 'content': 'class SimpleAgent:\n    def __init__(self, name):\n        self.name = name\n        self.memory = {}\n    \n    def learn(self, key, value):\n        self.memory[key] = value\n    \n    def recall(self, key):\n        return self.memory.get(key)\n    \n    def forget(self, key):\n        if key in self.memory:\n            del self.memory[key]\n        \n# Create an instance of the agent\nagent = SimpleAgent("My Agent")\n\n# Teach the agent something\nagent.learn("hello", "world")\n\n# Ask the agent to recall what it learned\nprint(agent.recall("hello"))\n\n# Ask the agent to forget what it learned\nagent.forget("hello")\n\n# Try to recall what the agent forgot\nprint(agent.recall("hello"))\n'}
+2026-04-04 00:04:57 - actions.code_actions - INFO - Wrote code file: D:\DesktopPilotAI\data\code\agent.py
+2026-04-04 00:04:57 - action_executor - INFO - Action completed: write_code
+2026-04-04 00:04:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\code\\agent.py', 'file_path': 'D:\\DesktopPilotAI\\data\\code\\agent.py'}
+2026-04-04 00:04:57 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:04:57 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:05:04 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:05:18 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'Word', 'content': 'Final Year Project: Simple Agent with Memory\nIntroduction:\nThe purpose of this project is to design and develop a simple agent with memory. This agent will have the capability to store and retrieve information, making it a basic artificial intelligence system.\nMethodology:\nThe agent will be developed using Python programming language and will utilize a dictionary to store and retrieve information.\nResults:\nThe agent will be able to store and retrieve information successfully, demonstrating its ability to learn and remember.\nConclusion:\nIn conclusion, the simple agent with memory has been successfully developed and tested. This project demonstrates the basic concepts of artificial intelligence and provides a foundation for further development.', 'window_title': 'Final Year Project'}
+2026-04-04 00:05:18 - actions.app_actions - INFO - Opening application: Word
+2026-04-04 00:05:18 - actions.app_actions - INFO - Successfully opened Word
+2026-04-04 00:05:30 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:05:30 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened Word and wrote the requested content.'}
+2026-04-04 00:05:31 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:05:31 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:05:38 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:05:50 - action_executor - INFO - Executing action: open with parameters: {'target': 'Word'}
+2026-04-04 00:05:50 - actions.app_actions - INFO - Opening application: Word
+2026-04-04 00:05:50 - actions.app_actions - INFO - Successfully opened Word
+2026-04-04 00:05:50 - action_executor - INFO - Action completed: open
+2026-04-04 00:05:50 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened Word'}
+2026-04-04 00:05:51 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:05:51 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:05:54 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:06:00 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'Excel', 'content': 'Sample Data', 'window_title': 'Excel'}
+2026-04-04 00:06:05 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:06:05 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened Excel and wrote the requested content.'}
+2026-04-04 00:06:05 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:06:06 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:06:11 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:06:18 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'excel', 'content': 'Name\tLocation\tAge\tDate\nJohn\tNew York\t25\t2022-01-01\nAlice\tLondon\t30\t2022-01-02', 'window_title': 'Excel'}
+2026-04-04 00:06:22 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:06:22 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened Excel and wrote the requested content.'}
+2026-04-04 00:06:22 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:06:23 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:06:26 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:06:38 - __main__ - WARNING - Could not classify control intent.
+Traceback (most recent call last):
+  File "D:\DesktopPilotAI\voice_assistant\main.py", line 365, in detect_control_intent
+    payload = json.loads(completion.choices[0].message.content.strip())
+  File "E:\Program Files\Python314\Lib\json\__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "E:\Program Files\Python314\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Program Files\Python314\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-04-04 00:06:40 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'excel', 'content': 'Name\tLocation\tAge\tDate\nJohn\tNew York\t25\t2022-01-01\nAlice\tLondon\t30\t2022-01-02\nBob\tParis\t28\t2022-01-03\nEmma\tTokyo\t22\t2022-01-04\nMichael\tSydney\t35\t2022-01-05\nSophia\tBeijing\t20\t2022-01-06\nWilliam\tMumbai\t40\t2022-01-07\nOlivia\tBerlin\t32\t2022-01-08\nJames\tSeoul\t29\t2022-01-09\nAva\tBangkok\t24\t2022-01-10\nGeorge\tIstanbul\t38\t2022-01-11\nIsabella\tKolkata\t26\t2022-01-12\nRobert\tShanghai\t42\t2022-01-13\nMia\tDelhi\t21\t2022-01-14\nRichard\tMoscow\t39\t2022-01-15\nCharlotte\tDhaka\t31\t2022-01-16\nCharles\tKarachi\t36\t2022-01-17\nAbigail\tLagos\t23\t2022-01-18\nThomas\tCairo\t41\t2022-01-19\nEmily\tTianjin\t27\t2022-01-20\nDonald\tChongqing\t43\t2022-01-21\nHarper\tKinshasa\t19\t2022-01-22\nRonald\tLahore\t44\t2022-01-23\nEvelyn\tBogota\t33\t2022-01-24\nHarry\tHyderabad\t34\t2022-01-25\nAmelia\tHo Chi Minh City\t18\t2022-01-26\nFrank\tRiyadh\t45\t2022-01-27\nLily\tAhmedabad\t16\t2022-01-28\nJoseph\tCape Town\t46\t2022-01-29\nVictoria\tSantiago\t17\t2022-01-30', 'window_title': 'Excel'}
+2026-04-04 00:06:45 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:06:45 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened Excel and wrote the requested content.'}
+2026-04-04 00:06:45 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:06:45 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:06:50 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:06:58 - action_executor - INFO - Executing action: create_file with parameters: {'target': 'sample_data.xlsx', 'content': 'Name\tLocation\tAge\tDate\nJohn\tNew York\t25\t2022-01-01\nAlice\tLos Angeles\t30\t2022-01-02\nBob\tChicago\t28\t2022-01-03\nEmily\tHouston\t22\t2022-01-04\nMichael\tPhoenix\t35\t2022-01-05\nSarah\tPhiladelphia\t29\t2022-01-06\nWilliam\tSan Antonio\t38\t2022-01-07\nOlivia\tSan Diego\t26\t2022-01-08\nJames\tDallas\t32\t2022-01-09\nAva\tSan Jose\t24\t2022-01-10\nGeorge\tAustin\t40\t2022-01-11\nIsabella\tJacksonville\t27\t2022-01-12\nCharles\tSan Francisco\t36\t2022-01-13\nMia\tIndianapolis\t23\t2022-01-14\nFrank\tColumbus\t39\t2022-01-15\nCharlotte\tFort Worth\t31\t2022-01-16\nJoseph\tCharlotte\t37\t2022-01-17\nAbigail\tMemphis\t33\t2022-01-18\nRobert\tBoston\t41\t2022-01-19\nEmily\tBaltimore\t34\t2022-01-20\nRichard\tDetroit\t42\t2022-01-21\nHarper\tEl Paso\t28\t2022-01-22\nKevin\tMilwaukee\t44\t2022-01-23\nLily\tSeattle\t45\t2022-01-24\nEvelyn\tDenver\t46\t2022-01-25\nJackson\tWashington\t47\t2022-01-26\nAiden\tNashville\t48\t2022-01-27\nSofia\tOklahoma City\t49\t2022-01-28\nEthan\tPortland\t50\t2022-01-29\nMason\tLas Vegas\t51\t2022-01-30'}
+2026-04-04 00:06:58 - actions.file_actions - INFO - Created file: D:\DesktopPilotAI\data\sample_data.xlsx
+2026-04-04 00:06:58 - action_executor - INFO - Action completed: create_file
+2026-04-04 00:06:58 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\sample_data.xlsx', 'file_path': 'D:\\DesktopPilotAI\\data\\sample_data.xlsx'}
+2026-04-04 00:06:59 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:06:59 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:07:05 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:07:09 - __main__ - ERROR - Aura voice loop failed
+Traceback (most recent call last):
+  File "D:\DesktopPilotAI\voice_assistant\main.py", line 755, in run
+    model_response = ask_ai(
+        self.client,
+    ...<4 lines>...
+        ),
+    )
+  File "D:\DesktopPilotAI\voice_assistant\main.py", line 83, in ask_ai
+    completion = client.chat.completions.create(
+        model=GROQ_CHAT_MODEL,
+        temperature=0.7,
+        messages=messages,
+    )
+  File "D:\DesktopPilotAI\venv\Lib\site-packages\groq\resources\chat\completions.py", line 461, in create
+    return self._post(
+           ~~~~~~~~~~^
+        "/openai/v1/chat/completions",
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<45 lines>...
+        stream_cls=Stream[ChatCompletionChunk],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    )
+    ^
+  File "D:\DesktopPilotAI\venv\Lib\site-packages\groq\_base_client.py", line 1280, in post
+    return cast(ResponseT, self.request(cast_to, opts, stream=stream, stream_cls=stream_cls))
+                           ~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DesktopPilotAI\venv\Lib\site-packages\groq\_base_client.py", line 1067, in request
+    raise self._make_status_error_from_response(err.response) from None
+groq.RateLimitError: Error code: 429 - {'error': {'message': 'Rate limit reached for model `llama-3.3-70b-versatile` in organization `org_01kf3zh8c4fvkv93qqe4tpgk2v` service tier `on_demand` on tokens per day (TPD): Limit 100000, Used 99021, Requested 1865. Please try again in 12m45.504s. Need more tokens? Upgrade to Dev Tier today at https://console.groq.com/settings/billing', 'type': 'tokens', 'code': 'rate_limit_exceeded'}}
+2026-04-04 00:14:24 - __main__ - INFO - Aura voice style configured with voice hint 'zira', style 'warm, natural, expressive', emotion 'gentle, friendly, confident'
+2026-04-04 00:14:29 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:14:39 - action_executor - INFO - Executing action: play_media with parameters: {'platform': 'youtube', 'title': '3blue1brown', 'browser': 'chrome'}
+2026-04-04 00:14:39 - actions.web_actions - INFO - Opening media target: https://www.youtube.com/results?search_query=3blue1brown
+2026-04-04 00:14:40 - action_executor - INFO - Action completed: play_media
+2026-04-04 00:14:40 - __main__ - INFO - Action result: {'status': 'success', 'message': "I opened youtube for '3blue1brown'.", 'url': 'https://www.youtube.com/results?search_query=3blue1brown', 'title': '3blue1brown', 'platform': 'youtube', 'browser': 'chrome'}
+2026-04-04 00:14:40 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:14:42 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:14:46 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:15:01 - action_executor - INFO - Executing action: play_media with parameters: {'platform': 'youtube', 'title': '3blue1brown', 'browser': 'chrome'}
+2026-04-04 00:15:01 - actions.web_actions - INFO - Opening media target: https://www.youtube.com/results?search_query=3blue1brown
+2026-04-04 00:15:01 - action_executor - INFO - Action completed: play_media
+2026-04-04 00:15:01 - __main__ - INFO - Action result: {'status': 'success', 'message': "I opened youtube for '3blue1brown'.", 'url': 'https://www.youtube.com/results?search_query=3blue1brown', 'title': '3blue1brown', 'platform': 'youtube', 'browser': 'chrome'}
+2026-04-04 00:15:01 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:15:01 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:15:05 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:15:16 - action_executor - INFO - Executing action: play_media with parameters: {'platform': 'spotify', 'browser': 'chrome'}
+2026-04-04 00:15:16 - action_executor - ERROR - Parameter error: play_media() missing 1 required positional argument: 'title'
+2026-04-04 00:15:16 - __main__ - INFO - Action result: {'status': 'error', 'message': "play_media() missing 1 required positional argument: 'title'"}
+2026-04-04 00:15:17 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:15:17 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:15:20 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:15:26 - action_executor - INFO - Executing action: play_media with parameters: {'platform': 'youtube', 'title': 'song', 'browser': 'chrome'}
+2026-04-04 00:15:26 - actions.web_actions - INFO - Opening media target: https://www.youtube.com/results?search_query=song
+2026-04-04 00:15:26 - action_executor - INFO - Action completed: play_media
+2026-04-04 00:15:27 - __main__ - INFO - Action result: {'status': 'success', 'message': "I opened youtube for 'song'.", 'url': 'https://www.youtube.com/results?search_query=song', 'title': 'song', 'platform': 'youtube', 'browser': 'chrome'}
+2026-04-04 00:15:27 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:15:27 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:15:35 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:15:50 - action_executor - INFO - Executing action: play_media with parameters: {'platform': 'youtube', 'title': 'song', 'browser': 'chrome'}
+2026-04-04 00:15:50 - actions.web_actions - INFO - Opening media target: https://www.youtube.com/results?search_query=song
+2026-04-04 00:15:50 - action_executor - INFO - Action completed: play_media
+2026-04-04 00:15:50 - __main__ - INFO - Action result: {'status': 'success', 'message': "I opened youtube for 'song'.", 'url': 'https://www.youtube.com/results?search_query=song', 'title': 'song', 'platform': 'youtube', 'browser': 'chrome'}
+2026-04-04 00:15:51 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:15:51 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:15:54 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:16:07 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:16:07 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:16:14 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:16:22 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:16:22 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:16:41 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:16:57 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:16:57 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:17:00 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:17:14 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:17:14 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:17:16 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:17:33 - action_executor - INFO - Executing action: send_email with parameters: {'receiver': 'office_email', 'subject': 'Leave Request for One Day', 'body': 'Dear Team, I am writing to request a leave of absence for one day. I will make sure to catch up on any missed work as soon as possible. Thank you for your understanding.'}
+2026-04-04 00:17:33 - actions.email_actions - INFO - Sending email to office_email with subject Leave Request for One Day
+2026-04-04 00:17:37 - action_executor - ERROR - Execution error: <HttpError 400 when requesting https://gmail.googleapis.com/gmail/v1/users/me/messages/send?alt=json returned "Invalid To header". Details: "[{'message': 'Invalid To header', 'domain': 'global', 'reason': 'invalidArgument'}]">
+2026-04-04 00:17:37 - __main__ - INFO - Action result: {'status': 'error', 'message': '<HttpError 400 when requesting https://gmail.googleapis.com/gmail/v1/users/me/messages/send?alt=json returned "Invalid To header". Details: "[{\'message\': \'Invalid To header\', \'domain\': \'global\', \'reason\': \'invalidArgument\'}]">'}
+2026-04-04 00:17:37 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:17:37 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:17:41 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:17:54 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:17:54 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:18:14 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:18:26 - action_executor - INFO - Executing action: send_email with parameters: {'receiver': 'harshita005.garg@gmail.com', 'subject': 'Leave Request for One Day', 'body': 'Dear Team, I am writing to request a leave of absence for one day. I will make sure to catch up on any missed work as soon as possible. Thank you for your understanding.'}
+2026-04-04 00:18:26 - actions.email_actions - INFO - Sending email to harshita005.garg@gmail.com with subject Leave Request for One Day
+2026-04-04 00:18:28 - action_executor - INFO - Action completed: send_email
+2026-04-04 00:18:28 - __main__ - INFO - Action result: {'status': 'success', 'message': 'I sent the email to harshita005.garg@gmail.com.', 'receiver': 'harshita005.garg@gmail.com', 'subject': 'Leave Request for One Day'}
+2026-04-04 00:18:28 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:18:28 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:18:33 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:18:46 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:18:47 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:18:53 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:19:03 - action_executor - INFO - Executing action: calculate with parameters: {'expression': '5/6*3'}
+2026-04-04 00:19:03 - actions.app_actions - INFO - Opening application: calculator
+2026-04-04 00:19:04 - actions.app_actions - INFO - Successfully opened calculator
+2026-04-04 00:19:32 - actions.app_actions - WARNING - Could not type expression into Calculator window.
+Traceback (most recent call last):
+  File "D:\DesktopPilotAI\voice_assistant\actions\app_actions.py", line 493, in calculate
+    _focus_and_paste(_window_title_candidates("calculator"), expression)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DesktopPilotAI\voice_assistant\actions\app_actions.py", line 243, in _focus_and_paste
+    subprocess.run(
+    ~~~~~~~~~~~~~~^
+        ["powershell", "-NoProfile", "-Command", script],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        text=True,
+        ^^^^^^^^^^
+    )
+    ^
+  File "E:\Program Files\Python314\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['powershell', '-NoProfile', '-Command', '\n$wshell = New-Object -ComObject WScript.Shell\n$activated = $false\n$titles = $env:AURA_WINDOW_TITLES -split \'\\|\\|\'\n$processName = $env:AURA_PROCESS_NAME\nfor ($i = 0; $i -lt 40 -and -not $activated; $i++) {\n    foreach ($title in $titles) {\n        if ($title -and $wshell.AppActivate($title)) {\n            $activated = $true\n            break\n        }\n    }\n    if (-not $activated) {\n        $matchingProcess = Get-Process |\n            Where-Object {\n                $_.MainWindowTitle -and (\n                    ($processName -and $_.ProcessName -eq $processName) -or\n                    ($titles | Where-Object { $_ -and $_.Trim() -and $_.MainWindowTitle -like (\'*\' + $_ + \'*\') })\n                )\n            } |\n            Select-Object -First 1\n        if ($matchingProcess) {\n            $activated = $wshell.AppActivate($matchingProcess.Id)\n        }\n    }\n    if (-not $activated) {\n        Start-Sleep -Milliseconds 400\n    }\n}\nif (-not $activated) {\n    throw "Could not focus any target window: $env:AURA_WINDOW_TITLES"\n}\nStart-Sleep -Milliseconds 500\nif ($env:AURA_PRE_KEYS) {\n    $wshell.SendKeys($env:AURA_PRE_KEYS)\n    Start-Sleep -Milliseconds 700\n}\nSet-Clipboard -Value $env:AURA_TEXT\nStart-Sleep -Milliseconds 350\n$wshell.SendKeys(\'^v\')\n']' returned non-zero exit status 1.
+2026-04-04 00:19:33 - action_executor - INFO - Action completed: calculate
+2026-04-04 00:19:33 - __main__ - INFO - Action result: {'status': 'success', 'message': 'I calculated 5/6*3. The result is 2.5.', 'expression': '5/6*3', 'result': 2.5}
+2026-04-04 00:19:33 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:19:33 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:19:39 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:19:49 - action_executor - INFO - Executing action: calculate with parameters: {'expression': '526 * 346'}
+2026-04-04 00:19:49 - actions.app_actions - INFO - Opening application: calculator
+2026-04-04 00:19:49 - actions.app_actions - INFO - Successfully opened calculator
+2026-04-04 00:20:09 - actions.app_actions - WARNING - Could not type expression into Calculator window.
+Traceback (most recent call last):
+  File "D:\DesktopPilotAI\voice_assistant\actions\app_actions.py", line 493, in calculate
+    _focus_and_paste(_window_title_candidates("calculator"), expression)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DesktopPilotAI\voice_assistant\actions\app_actions.py", line 243, in _focus_and_paste
+    subprocess.run(
+    ~~~~~~~~~~~~~~^
+        ["powershell", "-NoProfile", "-Command", script],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        text=True,
+        ^^^^^^^^^^
+    )
+    ^
+  File "E:\Program Files\Python314\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['powershell', '-NoProfile', '-Command', '\n$wshell = New-Object -ComObject WScript.Shell\n$activated = $false\n$titles = $env:AURA_WINDOW_TITLES -split \'\\|\\|\'\n$processName = $env:AURA_PROCESS_NAME\nfor ($i = 0; $i -lt 40 -and -not $activated; $i++) {\n    foreach ($title in $titles) {\n        if ($title -and $wshell.AppActivate($title)) {\n            $activated = $true\n            break\n        }\n    }\n    if (-not $activated) {\n        $matchingProcess = Get-Process |\n            Where-Object {\n                $_.MainWindowTitle -and (\n                    ($processName -and $_.ProcessName -eq $processName) -or\n                    ($titles | Where-Object { $_ -and $_.Trim() -and $_.MainWindowTitle -like (\'*\' + $_ + \'*\') })\n                )\n            } |\n            Select-Object -First 1\n        if ($matchingProcess) {\n            $activated = $wshell.AppActivate($matchingProcess.Id)\n        }\n    }\n    if (-not $activated) {\n        Start-Sleep -Milliseconds 400\n    }\n}\nif (-not $activated) {\n    throw "Could not focus any target window: $env:AURA_WINDOW_TITLES"\n}\nStart-Sleep -Milliseconds 500\nif ($env:AURA_PRE_KEYS) {\n    $wshell.SendKeys($env:AURA_PRE_KEYS)\n    Start-Sleep -Milliseconds 700\n}\nSet-Clipboard -Value $env:AURA_TEXT\nStart-Sleep -Milliseconds 350\n$wshell.SendKeys(\'^v\')\n']' returned non-zero exit status 1.
+2026-04-04 00:20:09 - action_executor - INFO - Action completed: calculate
+2026-04-04 00:20:09 - __main__ - INFO - Action result: {'status': 'success', 'message': 'I calculated 526 * 346. The result is 181996.', 'expression': '526 * 346', 'result': 181996}
+2026-04-04 00:20:10 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:20:10 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:20:19 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:20:35 - action_executor - INFO - Executing action: calculate with parameters: {'expression': '526*346'}
+2026-04-04 00:20:35 - actions.app_actions - INFO - Opening application: calculator
+2026-04-04 00:20:35 - actions.app_actions - INFO - Successfully opened calculator
+2026-04-04 00:20:54 - actions.app_actions - WARNING - Could not type expression into Calculator window.
+Traceback (most recent call last):
+  File "D:\DesktopPilotAI\voice_assistant\actions\app_actions.py", line 493, in calculate
+    _focus_and_paste(_window_title_candidates("calculator"), expression)
+    ~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "D:\DesktopPilotAI\voice_assistant\actions\app_actions.py", line 243, in _focus_and_paste
+    subprocess.run(
+    ~~~~~~~~~~~~~~^
+        ["powershell", "-NoProfile", "-Command", script],
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<3 lines>...
+        text=True,
+        ^^^^^^^^^^
+    )
+    ^
+  File "E:\Program Files\Python314\Lib\subprocess.py", line 577, in run
+    raise CalledProcessError(retcode, process.args,
+                             output=stdout, stderr=stderr)
+subprocess.CalledProcessError: Command '['powershell', '-NoProfile', '-Command', '\n$wshell = New-Object -ComObject WScript.Shell\n$activated = $false\n$titles = $env:AURA_WINDOW_TITLES -split \'\\|\\|\'\n$processName = $env:AURA_PROCESS_NAME\nfor ($i = 0; $i -lt 40 -and -not $activated; $i++) {\n    foreach ($title in $titles) {\n        if ($title -and $wshell.AppActivate($title)) {\n            $activated = $true\n            break\n        }\n    }\n    if (-not $activated) {\n        $matchingProcess = Get-Process |\n            Where-Object {\n                $_.MainWindowTitle -and (\n                    ($processName -and $_.ProcessName -eq $processName) -or\n                    ($titles | Where-Object { $_ -and $_.Trim() -and $_.MainWindowTitle -like (\'*\' + $_ + \'*\') })\n                )\n            } |\n            Select-Object -First 1\n        if ($matchingProcess) {\n            $activated = $wshell.AppActivate($matchingProcess.Id)\n        }\n    }\n    if (-not $activated) {\n        Start-Sleep -Milliseconds 400\n    }\n}\nif (-not $activated) {\n    throw "Could not focus any target window: $env:AURA_WINDOW_TITLES"\n}\nStart-Sleep -Milliseconds 500\nif ($env:AURA_PRE_KEYS) {\n    $wshell.SendKeys($env:AURA_PRE_KEYS)\n    Start-Sleep -Milliseconds 700\n}\nSet-Clipboard -Value $env:AURA_TEXT\nStart-Sleep -Milliseconds 350\n$wshell.SendKeys(\'^v\')\n']' returned non-zero exit status 1.
+2026-04-04 00:20:54 - action_executor - INFO - Action completed: calculate
+2026-04-04 00:20:54 - __main__ - INFO - Action result: {'status': 'success', 'message': 'I calculated 526*346. The result is 181996.', 'expression': '526*346', 'result': 181996}
+2026-04-04 00:20:56 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:20:56 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:21:05 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:21:24 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'PowerPoint', 'content': 'Final Year Presentation', 'window_title': 'Presentation1'}
+2026-04-04 00:21:28 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:21:28 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened PowerPoint and wrote the requested content.'}
+2026-04-04 00:21:29 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:21:29 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:21:39 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:21:52 - __main__ - WARNING - Could not classify control intent.
+Traceback (most recent call last):
+  File "D:\DesktopPilotAI\voice_assistant\main.py", line 365, in detect_control_intent
+    payload = json.loads(completion.choices[0].message.content.strip())
+  File "E:\Program Files\Python314\Lib\json\__init__.py", line 352, in loads
+    return _default_decoder.decode(s)
+           ~~~~~~~~~~~~~~~~~~~~~~~^^^
+  File "E:\Program Files\Python314\Lib\json\decoder.py", line 345, in decode
+    obj, end = self.raw_decode(s, idx=_w(s, 0).end())
+               ~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^^^^^^
+  File "E:\Program Files\Python314\Lib\json\decoder.py", line 363, in raw_decode
+    raise JSONDecodeError("Expecting value", s, err.value) from None
+json.decoder.JSONDecodeError: Expecting value: line 1 column 1 (char 0)
+2026-04-04 00:21:56 - action_executor - INFO - Executing action: write_in_app with parameters: {'app': 'PowerPoint', 'content': 'Final Year Presentation', 'window_title': 'Presentation1'}
+2026-04-04 00:21:57 - action_executor - INFO - Action completed: write_in_app
+2026-04-04 00:21:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Opened PowerPoint and wrote the requested content.'}
+2026-04-04 00:21:57 - action_executor - INFO - Executing action: create_file with parameters: {'target': 'slide1.txt', 'content': 'Slide 1: Introduction\nWelcome to our final year presentation\nGroup Members: \nProject Title: '}
+2026-04-04 00:21:57 - actions.file_actions - INFO - Created file: D:\DesktopPilotAI\data\slide1.txt
+2026-04-04 00:21:57 - action_executor - INFO - Action completed: create_file
+2026-04-04 00:21:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\slide1.txt', 'file_path': 'D:\\DesktopPilotAI\\data\\slide1.txt'}
+2026-04-04 00:21:57 - action_executor - INFO - Executing action: create_file with parameters: {'target': 'slide2.txt', 'content': 'Slide 2: Problem Statement\nBackground\nProblem Definition\nObjective'}
+2026-04-04 00:21:57 - actions.file_actions - INFO - Created file: D:\DesktopPilotAI\data\slide2.txt
+2026-04-04 00:21:57 - action_executor - INFO - Action completed: create_file
+2026-04-04 00:21:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\slide2.txt', 'file_path': 'D:\\DesktopPilotAI\\data\\slide2.txt'}
+2026-04-04 00:21:57 - action_executor - INFO - Executing action: create_file with parameters: {'target': 'slide3.txt', 'content': 'Slide 3: Methodology\nResearch Design\nData Collection\nData Analysis'}
+2026-04-04 00:21:57 - actions.file_actions - INFO - Created file: D:\DesktopPilotAI\data\slide3.txt
+2026-04-04 00:21:57 - action_executor - INFO - Action completed: create_file
+2026-04-04 00:21:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\slide3.txt', 'file_path': 'D:\\DesktopPilotAI\\data\\slide3.txt'}
+2026-04-04 00:21:57 - action_executor - INFO - Executing action: create_file with parameters: {'target': 'slide4.txt', 'content': 'Slide 4: Results\nKey Findings\nDiscussion'}
+2026-04-04 00:21:57 - actions.file_actions - INFO - Created file: D:\DesktopPilotAI\data\slide4.txt
+2026-04-04 00:21:57 - action_executor - INFO - Action completed: create_file
+2026-04-04 00:21:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\slide4.txt', 'file_path': 'D:\\DesktopPilotAI\\data\\slide4.txt'}
+2026-04-04 00:21:57 - action_executor - INFO - Executing action: create_file with parameters: {'target': 'slide5.txt', 'content': 'Slide 5: Conclusion\nSummary of Findings\nRecommendations'}
+2026-04-04 00:21:57 - actions.file_actions - INFO - Created file: D:\DesktopPilotAI\data\slide5.txt
+2026-04-04 00:21:57 - action_executor - INFO - Action completed: create_file
+2026-04-04 00:21:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\slide5.txt', 'file_path': 'D:\\DesktopPilotAI\\data\\slide5.txt'}
+2026-04-04 00:21:57 - action_executor - INFO - Executing action: create_file with parameters: {'target': 'slide6.txt', 'content': 'Slide 6: References\nList of Sources'}
+2026-04-04 00:21:57 - actions.file_actions - INFO - Created file: D:\DesktopPilotAI\data\slide6.txt
+2026-04-04 00:21:57 - action_executor - INFO - Action completed: create_file
+2026-04-04 00:21:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\slide6.txt', 'file_path': 'D:\\DesktopPilotAI\\data\\slide6.txt'}
+2026-04-04 00:21:57 - action_executor - INFO - Executing action: write_code with parameters: {'target': 'presentation.py', 'content': "import os\nimport pptx\nfrom pptx.util import Inches\n# Create a new presentation\npresentation = pptx.Presentation()\n# Add slides\nslide1 = presentation.slides.add_slide(presentation.slide_layouts[6])\nslide2 = presentation.slides.add_slide(presentation.slide_layouts[6])\nslide3 = presentation.slides.add_slide(presentation.slide_layouts[6])\nslide4 = presentation.slides.add_slide(presentation.slide_layouts[6])\nslide5 = presentation.slides.add_slide(presentation.slide_layouts[6])\nslide6 = presentation.slides.add_slide(presentation.slide_layouts[6])\n# Save the presentation\npresentation.save('Desktop\\\\data\\\\final_year_presentation.pptx')"}
+2026-04-04 00:21:57 - actions.code_actions - INFO - Wrote code file: D:\DesktopPilotAI\data\code\presentation.py
+2026-04-04 00:21:57 - action_executor - INFO - Action completed: write_code
+2026-04-04 00:21:57 - __main__ - INFO - Action result: {'status': 'success', 'message': 'Saved in Desktop\\\\data\\\\code\\presentation.py', 'file_path': 'D:\\DesktopPilotAI\\data\\code\\presentation.py'}
+2026-04-04 00:21:58 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:21:58 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:22:08 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:22:22 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:22:22 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:22:35 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:23:04 - __main__ - INFO - Aura voice style configured with voice hint 'zira', style 'warm, natural, expressive', emotion 'gentle, friendly, confident'
+2026-04-04 00:23:10 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:23:27 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:23:27 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:23:37 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:23:50 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:23:50 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:24:11 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:24:22 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:24:22 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:25:47 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:26:01 - action_executor - INFO - Executing action: send_email with parameters: {'receiver': 'harshita005.garg@gmail.com', 'subject': 'Seeking Assistance with AI Voice Assistant Project in Python', 'body': 'Dear Harshita,\nI hope this email finds you well. I am reaching out to seek your assistance with a project I am working on, which involves building an AI voice assistant using Python. The project aims to create a voice-controlled interface that can perform various tasks, such as setting reminders, sending emails, and providing information on a wide range of topics.\nI have made some progress with the project, but I am facing some challenges with integrating certain features, such as natural language processing and speech recognition. I was wondering if you could provide some guidance or share your expertise in this area.\nSpecifically, I would appreciate any help with the following aspects of the project:\n- Implementing a robust speech recognition system that can accurately transcribe voice commands\n- Developing a natural language processing module that can understand the context and intent behind user queries\n- Integrating the voice assistant with other services, such as calendar and email clients\nI have attached some code snippets and project files to this email for your reference. If you are available and willing to help, I would be grateful for any advice or guidance you can offer.\nThank you for considering my request, and I look forward to hearing from you soon.\nBest regards,\nYour Name'}
+2026-04-04 00:26:01 - actions.email_actions - INFO - Sending email to harshita005.garg@gmail.com with subject Seeking Assistance with AI Voice Assistant Project in Python
+2026-04-04 00:26:02 - action_executor - INFO - Action completed: send_email
+2026-04-04 00:26:02 - __main__ - INFO - Action result: {'status': 'success', 'message': 'I sent the email to harshita005.garg@gmail.com.', 'receiver': 'harshita005.garg@gmail.com', 'subject': 'Seeking Assistance with AI Voice Assistant Project in Python'}
+2026-04-04 00:26:02 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:26:02 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:26:06 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:26:18 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:26:18 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:26:35 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:26:39 - action_executor - INFO - Executing action: calculate with parameters: {'expression': 'now()'}
+2026-04-04 00:26:39 - action_executor - ERROR - Validation error: Only basic arithmetic is allowed.
+2026-04-04 00:26:39 - __main__ - INFO - Action result: {'status': 'error', 'message': 'Only basic arithmetic is allowed.'}
+2026-04-04 00:26:39 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:26:39 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:26:43 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:26:48 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:26:48 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:26:54 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:27:07 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:27:08 - __main__ - INFO - Selected TTS voice matching hints 'zira'
+2026-04-04 00:27:13 - __main__ - INFO - Recording audio with silence detection
+2026-04-04 00:27:18 - __main__ - INFO - Speaking Aura response
+2026-04-04 00:27:18 - __main__ - INFO - Selected TTS voice matching hints 'zira'

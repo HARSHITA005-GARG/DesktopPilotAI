@@ -1,5 +1,6 @@
 import base64
 import os
+import re
 from email.message import EmailMessage
 
 from google.auth.transport.requests import Request
@@ -16,6 +17,7 @@ from utils.logger import get_logger
 
 logger = get_logger(__name__)
 GMAIL_SEND_SCOPE = ["https://www.googleapis.com/auth/gmail.send"]
+EMAIL_ADDRESS_PATTERN = re.compile(r"^[^@\s]+@[^@\s]+\.[^@\s]+$")
 
 
 def _require_email_config():
@@ -71,6 +73,8 @@ def send_email(receiver, subject, body):
 
     if not recipient:
         raise ValueError("Missing email recipient.")
+    if not EMAIL_ADDRESS_PATTERN.match(recipient):
+        raise ValueError("Email recipient must be a valid email address.")
     if not email_subject:
         raise ValueError("Missing email subject.")
     if not email_body:

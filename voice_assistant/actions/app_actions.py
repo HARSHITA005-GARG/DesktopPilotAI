@@ -2,6 +2,10 @@ import os
 import platform
 import subprocess
 import time
+import csv
+import io
+import json
+import re
 from ast import Add, BinOp, Constant, Div, Expression, Mult, Pow, Sub, UAdd, USub, UnaryOp, parse
 from utils.logger import get_logger
 
@@ -66,6 +70,22 @@ NEW_DOCUMENT_KEYS = {
     "vscode": "^n",
     "visual studio code": "^n",
     "code": "^n",
+}
+
+
+PROCESS_ALIASES = {
+    "word": "WINWORD",
+    "excel": "EXCEL",
+    "powerpoint": "POWERPNT",
+    "notepad": "notepad",
+    "chrome": "chrome",
+    "brave": "brave",
+    "edge": "msedge",
+    "firefox": "firefox",
+    "vs code": "Code",
+    "vscode": "Code",
+    "visual studio code": "Code",
+    "code": "Code",
 }
 
 
@@ -172,21 +192,36 @@ def _window_title_candidates(app_name, window_title=None):
     return _dedupe_preserve_order(raw_candidates)
 
 
-def _focus_and_paste(title_candidates, text, pre_keys=None):
+def _focus_and_paste(title_candidates, text, pre_keys=None, process_name=None):
     env = os.environ.copy()
     env["AURA_WINDOW_TITLES"] = "||".join(title_candidates)
     env["AURA_TEXT"] = text
     env["AURA_PRE_KEYS"] = pre_keys or ""
+    env["AURA_PROCESS_NAME"] = process_name or ""
 
     script = r"""
 $wshell = New-Object -ComObject WScript.Shell
 $activated = $false
 $titles = $env:AURA_WINDOW_TITLES -split '\|\|'
-for ($i = 0; $i -lt 30 -and -not $activated; $i++) {
+$processName = $env:AURA_PROCESS_NAME
+for ($i = 0; $i -lt 40 -and -not $activated; $i++) {
     foreach ($title in $titles) {
         if ($title -and $wshell.AppActivate($title)) {
             $activated = $true
             break
+        }
+    }
+    if (-not $activated) {
+        $matchingProcess = Get-Process |
+            Where-Object {
+                $_.MainWindowTitle -and (
+                    ($processName -and $_.ProcessName -eq $processName) -or
+                    ($titles | Where-Object { $_ -and $_.Trim() -and $_.MainWindowTitle -like ('*' + $_ + '*') })
+                )
+            } |
+            Select-Object -First 1
+        if ($matchingProcess) {
+            $activated = $wshell.AppActivate($matchingProcess.Id)
         }
     }
     if (-not $activated) {
@@ -196,13 +231,136 @@ for ($i = 0; $i -lt 30 -and -not $activated; $i++) {
 if (-not $activated) {
     throw "Could not focus any target window: $env:AURA_WINDOW_TITLES"
 }
+Start-Sleep -Milliseconds 500
 if ($env:AURA_PRE_KEYS) {
     $wshell.SendKeys($env:AURA_PRE_KEYS)
-    Start-Sleep -Milliseconds 400
+    Start-Sleep -Milliseconds 700
 }
 Set-Clipboard -Value $env:AURA_TEXT
-Start-Sleep -Milliseconds 200
+Start-Sleep -Milliseconds 350
 $wshell.SendKeys('^v')
+"""
+    subprocess.run(
+        ["powershell", "-NoProfile", "-Command", script],
+        check=True,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _parse_tabular_text(content):
+    text = (content or "").strip()
+    if not text:
+        return []
+
+    if "\t" in text:
+        delimiter = "\t"
+    elif "," in text:
+        delimiter = ","
+    else:
+        return [[text]]
+
+    rows = []
+    reader = csv.reader(io.StringIO(text), delimiter=delimiter)
+    for row in reader:
+        rows.append([cell.strip() for cell in row])
+    return rows
+
+
+def _write_in_excel(content):
+    rows = _parse_tabular_text(content)
+    if not rows:
+        raise ValueError("Missing text to write in Excel.")
+
+    env = os.environ.copy()
+    env["AURA_ROWS_JSON"] = json.dumps(rows)
+    script = r"""
+$rows = $env:AURA_ROWS_JSON | ConvertFrom-Json
+$excel = New-Object -ComObject Excel.Application
+$excel.Visible = $true
+$workbook = $excel.Workbooks.Add()
+$sheet = $workbook.Worksheets.Item(1)
+
+for ($r = 0; $r -lt $rows.Count; $r++) {
+    $row = $rows[$r]
+    if ($row -isnot [System.Collections.IEnumerable] -or $row -is [string]) {
+        $sheet.Cells.Item($r + 1, 1).Value2 = [string]$row
+        continue
+    }
+    for ($c = 0; $c -lt $row.Count; $c++) {
+        $sheet.Cells.Item($r + 1, $c + 1).Value2 = [string]$row[$c]
+    }
+}
+
+$sheet.Activate() | Out-Null
+$sheet.Cells.Item(1, 1).Select() | Out-Null
+"""
+    subprocess.run(
+        ["powershell", "-NoProfile", "-Command", script],
+        check=True,
+        env=env,
+        capture_output=True,
+        text=True,
+    )
+
+
+def _parse_presentation_content(content):
+    text = (content or "").strip()
+    if not text:
+        return []
+
+    blocks = [block.strip() for block in re.split(r"\n\s*\n", text) if block.strip()]
+    slides = []
+
+    for block in blocks:
+        lines = [line.strip() for line in block.splitlines() if line.strip()]
+        if not lines:
+            continue
+        title = re.sub(r"^slide\s*\d+\s*:\s*", "", lines[0], flags=re.IGNORECASE).strip()
+        body_lines = [re.sub(r"^slide\s*\d+\s*:\s*", "", line, flags=re.IGNORECASE).strip() for line in lines[1:]]
+        slides.append({
+            "title": title or "Slide",
+            "body": "\r\n".join(line for line in body_lines if line),
+        })
+
+    if not slides:
+        return [{"title": text, "body": ""}]
+
+    if len(slides) == 1 and not slides[0]["body"] and "\n" in text:
+        lines = [line.strip() for line in text.splitlines() if line.strip()]
+        if lines:
+            slides[0]["title"] = lines[0]
+            slides[0]["body"] = "\r\n".join(lines[1:])
+
+    return slides
+
+
+def _write_in_powerpoint(content):
+    slides = _parse_presentation_content(content)
+    if not slides:
+        raise ValueError("Missing text to write in PowerPoint.")
+
+    env = os.environ.copy()
+    env["AURA_SLIDES_JSON"] = json.dumps(slides)
+    script = r"""
+$slides = $env:AURA_SLIDES_JSON | ConvertFrom-Json
+$powerpoint = New-Object -ComObject PowerPoint.Application
+$powerpoint.Visible = -1
+$presentation = $powerpoint.Presentations.Add()
+
+for ($i = 0; $i -lt $slides.Count; $i++) {
+    $slideData = $slides[$i]
+    $layout = 2
+    $slide = $presentation.Slides.Add($i + 1, $layout)
+    $slide.Shapes.Title.TextFrame.TextRange.Text = [string]$slideData.title
+
+    if ($slide.Shapes.Count -ge 2 -and $slideData.body) {
+        $slide.Shapes.Item(2).TextFrame.TextRange.Text = [string]$slideData.body
+    }
+}
+
+$powerpoint.Activate()
 """
     subprocess.run(
         ["powershell", "-NoProfile", "-Command", script],
@@ -280,14 +438,42 @@ def write_in_app(app, content, window_title=None):
     """Open a desktop app and paste the requested content into it."""
     raw_app_name = app.strip()
     app_name = raw_app_name.lower()
+    if not (content or "").strip():
+        raise ValueError("Missing text to write in the app.")
+
+    if app_name == "excel" and platform.system() == "Windows":
+        try:
+            _write_in_excel(content)
+            return {
+                "status": "success",
+                "message": "Opened Excel and wrote the requested content.",
+            }
+        except Exception:
+            logger.warning("Excel COM automation failed; falling back to window automation.", exc_info=True)
+
+    if app_name == "powerpoint" and platform.system() == "Windows":
+        try:
+            _write_in_powerpoint(content)
+            return {
+                "status": "success",
+                "message": "Opened PowerPoint and wrote the requested content.",
+            }
+        except Exception:
+            logger.warning("PowerPoint COM automation failed; falling back to window automation.", exc_info=True)
 
     open_app(raw_app_name)
     time.sleep(2.5)
 
     title_candidates = _window_title_candidates(app_name, window_title=window_title)
     pre_keys = NEW_DOCUMENT_KEYS.get(app_name, "")
+    process_name = PROCESS_ALIASES.get(app_name, "")
     try:
-        _focus_and_paste(title_candidates, content, pre_keys=pre_keys)
+        _focus_and_paste(
+            title_candidates,
+            content,
+            pre_keys=pre_keys,
+            process_name=process_name,
+        )
     except Exception:
         logger.warning("Window focus/paste failed for app '%s'.", raw_app_name, exc_info=True)
         raise

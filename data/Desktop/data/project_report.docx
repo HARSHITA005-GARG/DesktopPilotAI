@@ -1,0 +1,64 @@
+Project Title: Implementation of a Linked List in Java
+Introduction:
+This project aims to design and implement a linked list in Java, providing a comprehensive understanding of the data structure and its applications.
+Literature Review:
+A linked list is a linear data structure where each element is a separate object, and each element points to the next node in the sequence.
+Methodology:
+The project was implemented using Java, with a LinkedList class that includes methods for insertion, deletion, and traversal.
+Results:
+The implemented linked list was tested with various scenarios, demonstrating its efficiency and effectiveness.
+Conclusion:
+In conclusion, the project successfully implemented a linked list in Java, providing a solid foundation for further exploration of data structures and algorithms.
+Recommendations:
+Future work could involve optimizing the linked list for performance and exploring its applications in real-world scenarios.
+References:
+[1] Java Documentation, Oracle Corporation.
+[2] Data Structures and Algorithms in Java, Robert Lafore.
+Appendix:
+Source Code:
+public class LinkedList {
+    Node head;
+    public void insert(int data) {
+        Node newNode = new Node(data);
+        if (head == null) {
+            head = newNode;
+        } else {
+            Node last = head;
+            while (last.next != null) {
+                last = last.next;
+            }
+            last.next = newNode;
+        }
+    }
+    public void delete(int data) {
+        if (head == null) return;
+        if (head.data == data) {
+            head = head.next;
+        } else {
+            Node current = head;
+            while (current.next != null) {
+                if (current.next.data == data) {
+                    current.next = current.next.next;
+                    return;
+                }
+                current = current.next;
+            }
+        }
+    }
+    public void print() {
+        Node current = head;
+        while (current != null) {
+            System.out.print(current.data + " ");
+            current = current.next;
+        }
+        System.out.println();
+    }
+}
+public class Node {
+    int data;
+    Node next;
+    public Node(int data) {
+        this.data = data;
+        this.next = null;
+    }
+}
