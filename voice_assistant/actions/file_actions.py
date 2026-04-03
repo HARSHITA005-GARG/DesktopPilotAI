@@ -6,6 +6,14 @@ from utils.logger import get_logger
 logger = get_logger(__name__)
 
 
+def _spoken_data_path(file_path):
+    resolved = Path(file_path).resolve()
+    data_root = Path(DATA_DIR).resolve()
+    relative = resolved.relative_to(data_root)
+    path_text = str(relative).replace("/", "\\")
+    return f"Desktop\\\\data\\\\{path_text}" if path_text else "Desktop\\\\data\\\\"
+
+
 def _data_dir_only_error():
     return ValueError(
         f"File access is currently limited to the app data folder: {Path(DATA_DIR).resolve()}. "
@@ -46,7 +54,7 @@ def create_file(target, content="", root=None):
         logger.info(f"Created file: {file_path}")
         return {
             "status": "success",
-            "message": f"Created file at {file_path}",
+            "message": f"Saved in {_spoken_data_path(file_path)}",
             "file_path": str(file_path),
         }
     
@@ -68,7 +76,12 @@ def read_file(file_name, root=None):
             content = f.read()
         
         logger.info(f"Read file: {file_path}")
-        return {"status": "success", "content": content, "file_path": str(file_path)}
+        return {
+            "status": "success",
+            "content": content,
+            "file_path": str(file_path),
+            "message": f"Read from {_spoken_data_path(file_path)}",
+        }
     
     except Exception as e:
         logger.error(f"Failed to read file: {e}")

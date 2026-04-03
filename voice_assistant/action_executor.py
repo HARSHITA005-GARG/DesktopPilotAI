@@ -59,10 +59,10 @@ class ActionExecutor:
         
         except ValueError as e:
             logger.error(f"Validation error: {e}")
-            return {"status": "error", "message": "I couldn't understand that request clearly enough to run it."}
+            return {"status": "error", "message": str(e)}
         except TypeError as e:
             logger.error(f"Parameter error: {e}")
-            return {"status": "error", "message": "I understood the action, but some details were missing or invalid."}
+            return {"status": "error", "message": str(e)}
         except Exception as e:
             logger.error(f"Execution error: {e}")
-            return {"status": "error", "message": "I couldn't complete that action on your PC."}
+            return {"status": "error", "message": str(e)}

@@ -29,6 +29,14 @@ LANGUAGE_EXTENSIONS = {
 }
 
 
+def _spoken_code_path(file_path):
+    resolved = Path(file_path).resolve()
+    data_root = Path(DATA_DIR).resolve()
+    relative = resolved.relative_to(data_root)
+    path_text = str(relative).replace("/", "\\")
+    return f"Desktop\\\\data\\\\{path_text}" if path_text else "Desktop\\\\data\\\\code\\\\"
+
+
 def _slugify(text):
     cleaned = "".join(ch.lower() if ch.isalnum() else "_" for ch in (text or "generated_code"))
     collapsed = "_".join(part for part in cleaned.split("_") if part)
@@ -91,7 +99,7 @@ def write_code(target=None, content="", root=None, prompt=None, description=None
         logger.info(f"Wrote code file: {file_path}")
         return {
             "status": "success",
-            "message": f"Code written to {file_path}",
+            "message": f"Saved in {_spoken_code_path(file_path)}",
             "file_path": str(file_path),
         }
     

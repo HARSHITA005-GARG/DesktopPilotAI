@@ -19,6 +19,10 @@ APPS_WINDOWS = {
     "excel": "excel",
     "powerpoint": "powerpnt",
     "powershell": "powershell",
+    "vs code": "code",
+    "vscode": "code",
+    "visual studio code": "code",
+    "code": "code",
 }
 
 APPS_LINUX = {
@@ -39,37 +43,86 @@ APPS_MAC = {
 WINDOW_TITLES = {
     "notepad": "Notepad",
     "word": "Word",
+    "excel": "Excel",
+    "powerpoint": "PowerPoint",
     "calculator": "Calculator",
     "calc": "Calculator",
     "chrome": "Chrome",
     "firefox": "Firefox",
     "brave": "Brave",
     "edge": "Edge",
+    "vs code": "Visual Studio Code",
+    "vscode": "Visual Studio Code",
+    "visual studio code": "Visual Studio Code",
+    "code": "Visual Studio Code",
+}
+
+
+NEW_DOCUMENT_KEYS = {
+    "word": "^n",
+    "excel": "^n",
+    "powerpoint": "^n",
+    "vs code": "^n",
+    "vscode": "^n",
+    "visual studio code": "^n",
+    "code": "^n",
 }
 
 
 def _launch_windows_app(app_name):
     candidates = []
-    alias = APPS_WINDOWS.get(app_name)
+    raw_name = (app_name or "").strip()
+    alias = APPS_WINDOWS.get(raw_name.lower())
     if alias:
         candidates.append(alias)
-    candidates.append(app_name)
+    candidates.extend(
+        [
+            raw_name,
+            raw_name.lower(),
+            f"{raw_name}.exe" if raw_name and not raw_name.lower().endswith(".exe") else raw_name,
+            f"{raw_name.lower()}.exe" if raw_name and not raw_name.lower().endswith(".exe") else raw_name.lower(),
+        ]
+    )
 
-    attempted = []
+    attempted = set()
     for candidate in candidates:
-        if candidate in attempted:
+        normalized = (candidate or "").strip()
+        if not normalized:
             continue
-        attempted.append(candidate)
+        key = normalized.lower()
+        if key in attempted:
+            continue
+        attempted.add(key)
 
         try:
-            os.startfile(candidate)
+            os.startfile(normalized)
             return
         except OSError:
-            try:
-                subprocess.Popen([candidate])
-                return
-            except OSError:
-                continue
+            pass
+
+        try:
+            subprocess.Popen([normalized])
+            return
+        except OSError:
+            pass
+
+        try:
+            subprocess.run(
+                [
+                    "powershell",
+                    "-NoProfile",
+                    "-Command",
+                    "Start-Process",
+                    "-FilePath",
+                    normalized,
+                ],
+                check=True,
+                capture_output=True,
+                text=True,
+            )
+            return
+        except Exception:
+            continue
 
     raise FileNotFoundError(f"Could not open application '{app_name}'.")
 
@@ -80,12 +133,12 @@ def _launch_app(system, app_name):
         return
 
     if system == "Darwin":
-        app = APPS_MAC.get(app_name, app_name)
+        app = APPS_MAC.get(app_name.lower(), app_name)
         subprocess.Popen(["open", "-a", app])
         return
 
     if system == "Linux":
-        app = APPS_LINUX.get(app_name, app_name)
+        app = APPS_LINUX.get(app_name.lower(), app_name)
         subprocess.Popen([app])
         return
 
@@ -106,11 +159,15 @@ def _dedupe_preserve_order(values):
 
 
 def _window_title_candidates(app_name, window_title=None):
+    normalized = (app_name or "").strip()
+    lowered = normalized.lower()
     raw_candidates = [
         window_title,
-        WINDOW_TITLES.get(app_name),
-        app_name,
-        app_name.title(),
+        WINDOW_TITLES.get(lowered),
+        normalized,
+        normalized.title(),
+        normalized.replace(".exe", ""),
+        normalized.replace(".exe", "").title(),
     ]
     return _dedupe_preserve_order(raw_candidates)
 
@@ -156,25 +213,6 @@ $wshell.SendKeys('^v')
     )
 
 
-def _write_in_word(content):
-    env = os.environ.copy()
-    env["AURA_TEXT"] = content
-    script = r"""
-$word = New-Object -ComObject Word.Application
-$word.Visible = $true
-$document = $word.Documents.Add()
-$selection = $word.Selection
-$selection.TypeText($env:AURA_TEXT)
-"""
-    subprocess.run(
-        ["powershell", "-NoProfile", "-Command", script],
-        check=True,
-        env=env,
-        capture_output=True,
-        text=True,
-    )
-
-
 def _safe_eval(expression):
     allowed_nodes = (Expression, BinOp, UnaryOp, Constant, Add, Sub, Mult, Div, Pow, UAdd, USub)
     tree = parse(expression, mode="eval")
@@ -204,12 +242,11 @@ def open_app(app_name):
     """Open an application by name."""
     try:
         raw_app_name = app_name.strip()
-        app_name = raw_app_name.lower()
         system = platform.system()
         
         logger.info(f"Opening application: {raw_app_name}")
         
-        _launch_app(system, app_name)
+        _launch_app(system, raw_app_name)
         
         logger.info(f"Successfully opened {raw_app_name}")
         return {"status": "success", "message": f"Opened {raw_app_name}"}
@@ -222,38 +259,33 @@ def open_app(app_name):
 def open_target(target):
     """Open an app, URL, file, or folder."""
     normalized = target.strip()
-    lowered = normalized.lower()
-
-    if lowered in APPS_WINDOWS or lowered in APPS_LINUX or lowered in APPS_MAC:
-        return open_app(lowered)
 
     if normalized.startswith(("http://", "https://")):
         os.startfile(normalized)
         return {"status": "success", "message": f"Opened {normalized}"}
 
-    os.startfile(normalized)
-    return {"status": "success", "message": f"Opened {normalized}"}
+    if os.path.exists(normalized):
+        os.startfile(normalized)
+        return {"status": "success", "message": f"Opened {normalized}"}
+
+    try:
+        return open_app(normalized)
+    except Exception:
+        logger.warning("Falling back to shell open for target '%s'.", normalized, exc_info=True)
+        os.startfile(normalized)
+        return {"status": "success", "message": f"Opened {normalized}"}
 
 
 def write_in_app(app, content, window_title=None):
     """Open a desktop app and paste the requested content into it."""
     raw_app_name = app.strip()
     app_name = raw_app_name.lower()
-    if app_name == "word" and platform.system() == "Windows":
-        try:
-            _write_in_word(content)
-            return {
-                "status": "success",
-                "message": "I opened Word and wrote the requested content.",
-            }
-        except Exception:
-            logger.warning("Word COM automation failed; falling back to window automation.", exc_info=True)
 
     open_app(raw_app_name)
     time.sleep(2.5)
 
     title_candidates = _window_title_candidates(app_name, window_title=window_title)
-    pre_keys = "^n" if app_name == "word" else ""
+    pre_keys = NEW_DOCUMENT_KEYS.get(app_name, "")
     try:
         _focus_and_paste(title_candidates, content, pre_keys=pre_keys)
     except Exception:

@@ -55,39 +55,7 @@ CHUNK_DURATION_SECONDS = 0.2
 INTERRUPT_THRESHOLD = 1600
 INTERRUPT_CHUNKS = 4
 INTERRUPT_GRACE_SECONDS = 0.8
-SHUTDOWN_PHRASES = {
-    "shut down",
-    "shutdown",
-    "shut down aura",
-    "shutdown aura",
-    "stop listening",
-    "stop aura",
-}
-EMAIL_CONFIRM_PHRASES = {
-    "yes",
-    "yes send it",
-    "send it",
-    "send",
-    "confirm",
-    "confirm send",
-}
-EMAIL_CANCEL_PHRASES = {
-    "no",
-    "cancel",
-    "don't send",
-    "do not send",
-    "stop",
-}
 MEMORY_LOG_PREFIX = "MEMORY:"
-MEMORY_BLACKLIST_PHRASES = {
-    "i'm listening",
-    "i am listening",
-    "here to help",
-    "how can i help",
-    "call me again whenever you want",
-    "should i send it",
-    "please try saying it again",
-}
 
 
 def get_groq_client():
@@ -129,20 +97,6 @@ def normalize_transcript(transcript):
     cleaned = cleaned.replace("\r", " ").replace("\n", " ")
     cleaned = re.sub(r"\s+", " ", cleaned).strip()
 
-    fixes = {
-        r"\bnet flicks\b": "netflix",
-        r"\byou tube\b": "youtube",
-        r"\bhot star\b": "hotstar",
-        r"\bcalc ulator\b": "calculator",
-        r"\bnote pad\b": "notepad",
-        r"\bpower point\b": "powerpoint",
-        r"\bms word\b": "word",
-        r"\bopen ai\b": "OpenAI",
-        r"\bg mail\b": "gmail",
-    }
-    for pattern, replacement in fixes.items():
-        cleaned = re.sub(pattern, replacement, cleaned, flags=re.IGNORECASE)
-
     if cleaned:
         cleaned = cleaned[0].upper() + cleaned[1:]
     return cleaned
@@ -180,26 +134,21 @@ def load_memory():
 
 def is_valid_memory_item(item):
     text = (item or "").strip()
-    lowered = text.lower()
     if not text:
         return False
     if len(text) < 3 or len(text) > 160:
         return False
-    if any(phrase in lowered for phrase in MEMORY_BLACKLIST_PHRASES):
-        return False
-    if lowered.startswith(("i can", "i couldn't", "i could not", "okay,", "okay ", "sure,", "sure ")):
-        return False
     return True
 
 
-def save_memory(memory_items):
+def save_memory(client, memory_items):
     """Persist only new memory entries into assistant.log."""
-    existing = load_memory()
+    existing = filter_memory_items(client, load_memory())
     existing_keys = {item.lower() for item in existing}
     new_items = [
         item
         for item in memory_items[-MAX_MEMORY_ITEMS:]
-        if item.lower() not in existing_keys and is_valid_memory_item(item)
+        if item.lower() not in existing_keys and should_store_memory(client, item)
     ]
     if not new_items:
         return
@@ -300,7 +249,9 @@ def explain_action_result(client, user_prompt, action_payload, action_result):
                 "role": "system",
                 "content": (
                     "You are Aura. The requested desktop action has already been executed. "
-                    "Summarize the outcome naturally for the user in a warm, human way. "
+                    "Summarize the outcome naturally for the user in a warm, human way. Keep it concise. "
+                    "Prefer a single short sentence. "
+                    "If the action result already contains a usable user-facing message, preserve it closely. "
                     "Do not output JSON or mention internal action names unless necessary. "
                     f"Speaking style: {TTS_STYLE_HINT}. Emotional tone: {TTS_EMOTION_HINT}."
                 ),
@@ -382,19 +333,90 @@ def normalize_action_sequence(actions):
     return normalized
 
 
-def is_shutdown_command(transcript):
-    normalized = " ".join((transcript or "").strip().lower().split())
-    return normalized in SHUTDOWN_PHRASES
+def detect_control_intent(client, transcript, pending_email=False):
+    allowed_intents = ["shutdown", "none"]
+    if pending_email:
+        allowed_intents = ["email_confirm", "email_cancel", "shutdown", "none"]
+
+    completion = client.chat.completions.create(
+        model=GROQ_CHAT_MODEL,
+        temperature=0,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "Classify the user's intent. Return only compact JSON like "
+                    "{\"intent\":\"email_confirm\"}. "
+                    f"Allowed intents: {', '.join(allowed_intents)}. "
+                    "Choose email_confirm when the user is clearly approving sending. "
+                    "Choose email_cancel when the user is declining, stopping, or asking not to send. "
+                    "Choose shutdown when the user is asking the assistant to stop listening, close, exit, or shut down. "
+                    "Choose none for anything else."
+                ),
+            },
+            {
+                "role": "user",
+                "content": transcript,
+            },
+        ],
+    )
+
+    try:
+        payload = json.loads(completion.choices[0].message.content.strip())
+        intent = payload.get("intent", "none")
+        if intent in allowed_intents:
+            return intent
+    except Exception:
+        logger.warning("Could not classify control intent.", exc_info=True)
+
+    return "none"
 
 
-def is_email_confirm_command(transcript):
-    normalized = " ".join((transcript or "").strip().lower().split())
-    return normalized in EMAIL_CONFIRM_PHRASES
+def should_store_memory(client, item):
+    text = (item or "").strip()
+    if not is_valid_memory_item(text):
+        return False
+
+    completion = client.chat.completions.create(
+        model=GROQ_CHAT_MODEL,
+        temperature=0,
+        messages=[
+            {
+                "role": "system",
+                "content": (
+                    "Decide whether the text is worth storing as long-term user memory. "
+                    "Return only compact JSON like {\"store\":true}. "
+                    "Store only stable user facts, preferences, identity details, or explicit remember-this requests. "
+                    "Reject assistant filler, transient dialogue, confirmations, generic help text, and control-flow text."
+                ),
+            },
+            {
+                "role": "user",
+                "content": text,
+            },
+        ],
+    )
+
+    try:
+        payload = json.loads(completion.choices[0].message.content.strip())
+        return bool(payload.get("store"))
+    except Exception:
+        logger.warning("Could not classify memory item.", exc_info=True)
+        return False
 
 
-def is_email_cancel_command(transcript):
-    normalized = " ".join((transcript or "").strip().lower().split())
-    return normalized in EMAIL_CANCEL_PHRASES
+def filter_memory_items(client, items):
+    filtered = []
+    seen = set()
+    for item in items:
+        text = (item or "").strip()
+        key = text.lower()
+        if key in seen:
+            continue
+        if should_store_memory(client, text):
+            filtered.append(text)
+            seen.add(key)
+    return filtered[-MAX_MEMORY_ITEMS:]
 
 
 def format_email_confirmation(draft):
@@ -402,10 +424,10 @@ def format_email_confirmation(draft):
     subject = draft.get("subject", "").strip()
     body = draft.get("body", "").strip()
     return (
-        f"I drafted an email to {receiver}. "
-        f"The subject is: {subject}. "
-        f"The message says: {body}. "
-        "Should I send it?"
+        f"Email ready for {receiver}. "
+        f"Subject: {subject}. "
+        f"Body: {body}. "
+        "Say send it or cancel."
     )
 
 
@@ -643,7 +665,7 @@ class VoiceWorker(QObject):
         self.speaker = SpeechEngine()
         self.keep_running = True
         self.conversation_history = []
-        self.memory_items = load_memory()
+        self.memory_items = filter_memory_items(self.client, load_memory())
         self.pending_email_draft = None
 
     def stop(self):
@@ -673,7 +695,8 @@ class VoiceWorker(QObject):
 
                 self.transcript_ready.emit(transcript)
 
-                if is_shutdown_command(transcript):
+                control_intent = detect_control_intent(self.client, transcript, pending_email=False)
+                if control_intent == "shutdown":
                     reply = "Shutting down. Call me again whenever you want."
                     self.response_ready.emit(reply)
                     self.status.emit("Speaking...")
@@ -682,7 +705,20 @@ class VoiceWorker(QObject):
                     continue
 
                 if self.pending_email_draft is not None:
-                    if is_email_confirm_command(transcript):
+                    pending_intent = detect_control_intent(
+                        self.client,
+                        transcript,
+                        pending_email=True,
+                    )
+                    if pending_intent == "shutdown":
+                        self.pending_email_draft = None
+                        reply = "Shutting down."
+                        self.response_ready.emit(reply)
+                        self.status.emit("Speaking...")
+                        self.speaker.speak(reply)
+                        self.keep_running = False
+                        continue
+                    if pending_intent == "email_confirm":
                         self.status.emit("Running action: send_email...")
                         action_result = self.executor.execute(self.pending_email_draft)
                         logger.info("Action result: %s", action_result)
@@ -691,17 +727,13 @@ class VoiceWorker(QObject):
                         if action_result.get("status") == "error":
                             reply = naturalize_error_message(action_result.get("message"))
                         else:
-                            reply = explain_action_result(
-                                self.client,
-                                transcript,
-                                {"action": "send_email"},
-                                action_result,
-                            )
-                    elif is_email_cancel_command(transcript):
+                            receiver = action_result.get("receiver", "the recipient")
+                            reply = f"Email sent to {receiver}."
+                    elif pending_intent == "email_cancel":
                         self.pending_email_draft = None
-                        reply = "Okay, I won't send that email."
+                        reply = "Email cancelled."
                     else:
-                        reply = "I have the email ready. Please say send it to confirm, or say cancel."
+                        reply = "Say send it or cancel."
 
                     self.conversation_history.extend(
                         [
@@ -793,7 +825,8 @@ class VoiceWorker(QObject):
                 )
                 self.conversation_history = self.conversation_history[-MAX_HISTORY_MESSAGES:]
                 self.memory_items = merge_memory(self.memory_items, transcript, reply)
-                save_memory(self.memory_items)
+                self.memory_items = filter_memory_items(self.client, self.memory_items)
+                save_memory(self.client, self.memory_items)
 
                 self.response_ready.emit(reply)
                 self.status.emit("Speaking...")
