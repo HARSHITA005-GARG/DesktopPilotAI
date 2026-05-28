@@ -1,91 +1,93 @@
-# Aura Voice Assistant
+ # Local Agentic Voice Assistant: Phase 1 Implementation
 
-Aura is a desktop voice assistant built with Python, PyQt6, Groq, and local text-to-speech. It listens continuously, transcribes speech, decides whether to answer or run an action, and speaks the response back through a floating desktop UI.
+This repository contains the architecture and implementation details for Phase 1 of a local, real-time, voice-controlled coding assistant. This system is designed to run completely offline on Windows, heavily constrained by 8GB of VRAM and 24GB of system RAM, while solving the dual problems of acoustic echo and agentic context amnesia.
 
-## Features
+## Table of Contents
+- [Architecture Overview](#architecture-overview)
+- [Hardware & Resource Allocation](#hardware--resource-allocation)
+- [Component Breakdown](#component-breakdown)
+  - [1. Acoustic Processing (The Ear)](#1-acoustic-processing-the-ear)
+  - [2. The Orchestrator (The Brainstem)](#2-the-orchestrator-the-brainstem)
+  - [3. Memory Subsystems (The Hippocampus)](#3-memory-subsystems-the-hippocampus)
+  - [4. The Core Intelligence (The Prefrontal Cortex)](#4-the-core-intelligence-the-prefrontal-cortex)
+  - [5. The Execution Sandbox (The Hands)](#5-the-execution-sandbox-the-hands)
+  - [6. Vocalization (The Mouth)](#6-vocalization-the-mouth)
 
-- Continuous microphone listening with silence detection
-- Speech-to-text using Groq Whisper
-- Conversational replies using a Groq chat model
-- Local text-to-speech with `pyttsx3`
-- Desktop actions such as opening apps, browsing, writing in apps, calculations, file creation, code writing, media playback, and Gmail sending
-- Floating PyQt6 orb interface with transcript and response panels
+---
 
-## Requirements
+## Architecture Overview
 
-- Python 3.11+ recommended
-- Windows desktop environment
-- A working microphone and speaker
-- A Groq API key
+The system operates on a continuous, event-driven loop. It captures raw audio, filters out system noise, transcribes the speech, enriches the prompt with historical context, generates a response or action via a local LLM, executes code in a secure container, and streams a vocalized response back to the user—all in near real-time.
 
-## Installation
+---
 
-```bash
-pip install -r requirements.txt
-```
+## Hardware & Resource Allocation
 
-## Environment Setup
+Given the hardware constraints (NVIDIA RTX 5060 8GB, 24GB System RAM), strict resource isolation is required to prevent out-of-memory (OOM) errors and latency spikes.
 
-Create a local `.env` file based on `.env.example`.
+| Subsystem | Processing Unit | Estimated Footprint |
+| :--- | :--- | :--- |
+| **Acoustic Filter (WebRTC AEC)** | CPU | < 50MB |
+| **VAD & Transcription (Whisper)** | CPU & System RAM | ~1.5GB |
+| **Memory (ChromaDB + Embeddings)** | CPU & System RAM | ~1.0GB |
+| **TTS (Piper)** | CPU & System RAM | ~200MB |
+| **LLM Inference (Ollama/vLLM)** | GPU (VRAM) & System RAM | ~5GB (VRAM) + System Ram Spill |
+| **Orchestrator & Docker Sandbox** | CPU & System RAM | ~500MB |
 
-Required:
+---
 
-- `GROQ_API_KEY`
+## Component Breakdown
 
-Common optional settings:
+### 1. Acoustic Processing (The Ear)
+Solving the Acoustic Echo Loop is the first technical hurdle. The system must not transcribe its own voice.
 
-- `AURA_LOG_LEVEL`
-- `AURA_LOG_FILE`
-- `AURA_SAMPLE_RATE`
-- `AURA_RECORD_SECONDS`
-- `AURA_TTS_RATE`
-- `AURA_TTS_VOLUME`
-- `AURA_TTS_VOICE_HINT`
-- `AURA_TTS_ALLOW_INTERRUPT`
-- `AURA_TTS_STYLE_HINT`
-- `AURA_TTS_EMOTION_HINT`
-- `AURA_DATA_DIR`
-- `AURA_SMTP_SENDER`
-- `AURA_GMAIL_CREDENTIALS_FILE`
-- `AURA_GMAIL_TOKEN_FILE`
+* **WASAPI Loopback (Windows Audio Session API):** Uses Python (`soundcard` or `pyaudiowpatch`) to capture the exact audio playing through the laptop speakers.
+* **WebRTC AEC (Acoustic Echo Cancellation):** A Python wrapper for WebRTC's audio processing module. It takes the raw microphone input and the WASAPI loopback, mathematically subtracting the speaker audio from the microphone feed in real-time.
+* **Silero VAD (Voice Activity Detection):** Runs continuously on the clean audio stream. It detects the precise millisecond the user stops talking (e.g., a 500ms silence threshold) to trigger the transcription phase.
+* **Faster-Whisper (STT):** Uses the `base.en` or `small.en` model (INT8 quantization) to convert the resulting audio snippet into text with sub-second latency.
 
-## Run
+### 2. The Orchestrator (The Brainstem)
+The central nervous system of the application, responsible for routing data and managing state.
 
-From the project root:
+* **Framework:** **LangGraph** (or Microsoft AutoGen). LangGraph is preferred for its ability to define explicit state machines and cyclic graphs, crucial for handling "tool failure/retry" loops.
+* **Role:**
+    1. Receives text from Faster-Whisper.
+    2. Queries the Vector DB for context.
+    3. Manages the short-term conversation history buffer.
+    4. Streams the prompt to the LLM.
+    5. Intercepts the LLM's streaming output, routing text to the TTS engine and code blocks to the Docker Sandbox.
 
-```bash
-python voice_assistant/main.py
-```
+### 3. Memory Subsystems (The Hippocampus)
+Solves the "Contextual Amnesia" problem inherent in standard AI coding tools.
 
-Click the orb once to start continuous listening.
+* **Short-Term Memory:** Managed by the orchestrator. A sliding window of the last *N* interactions.
+* **Long-Term Memory:** **ChromaDB**. Runs locally on the CPU.
+* **Embeddings:** **SentenceTransformers** (`all-MiniLM-L6-v2`).
+* **Implementation:** As the user provides preferences or architectural decisions (e.g., "Always use `pytest` for testing"), the orchestrator vectorizes these statements and stores them in ChromaDB. On subsequent queries, the orchestrator retrieves relevant vectors and injects them into the system prompt.
 
-## Email Setup
+### 4. The Core Intelligence (The Prefrontal Cortex)
+The LLM responsible for reasoning, conversation, and writing code.
 
-Aura sends email through Gmail OAuth.
+* **Model Server:** **Ollama** running inside a Docker container via WSL2.
+* **Hardware Integration:** Docker Desktop must be configured for the WSL2 backend with the NVIDIA Container Toolkit installed, granting the container direct access to the RTX 5060 tensor cores.
+* **Model Selection:** An 8B parameter model fine-tuned for tool calling (e.g., `Hermes-2-Pro-Llama-3-8B`).
+* **Quantization:** Uses GGUF format. The heaviest layers are loaded into the 8GB VRAM for speed, while the remaining layers are spilled into the 24GB System RAM to prevent VRAM exhaustion.
 
-1. Put your Google OAuth desktop client file at the path used by `AURA_GMAIL_CREDENTIALS_FILE`.
-2. Set `AURA_SMTP_SENDER` in `.env`.
-3. The first send will open a local Google sign-in flow and create the token file automatically.
+### 5. The Execution Sandbox (The Hands)
+Provides a secure environment for the agent to test its code without accessing the host Windows OS directly.
 
-Do not commit personal OAuth credentials or token files.
+* **Implementation:** The Python `docker` SDK.
+* **Workflow:**
+    1. The orchestrator detects a code block generated by the LLM.
+    2. It spins up a transient, lightweight container (e.g., `python:3.11-slim`).
+    3. It bind-mounts a specific working directory from the Windows host (e.g., `C:/Users/Name/AI_Workspace`) into the container.
+    4. The code is executed inside the container.
+    5. Standard output (`stdout`) and standard error (`stderr`) are captured.
+    6. The container is immediately destroyed.
+    7. The output is fed back into the orchestrator. If it's an error, the orchestrator prompts the LLM to fix it silently.
 
-## Speech Notes
+### 6. Vocalization (The Mouth)
+Ensures the assistant can speak to the user without introducing massive latency.
 
-- `AURA_TTS_ALLOW_INTERRUPT` defaults to `false`.
-- Keeping it `false` is usually better on desktop speakers because it prevents Aura from interrupting itself when its own voice is picked up by the microphone.
-
-## Project Structure
-
-```text
-voice_assistant/
-  actions/
-  utils/
-  action_executor.py
-  config.py
-  main.py
-```
-
-## Notes
-
-- Logs are written to `assistant.log` by default.
-- Gmail token and other local machine files should stay out of version control.
+* **Engine:** **Piper TTS**.
+* **Implementation:** To achieve "real-time" performance, the orchestrator must use **chunked streaming**. As the LLM streams its text response, a Python script monitors the output for sentence-ending punctuation (`.`, `?`, `!`). When a sentence is complete, it is immediately sent to Piper to be spoken, overlapping the audio playback of sentence 1 with the text generation of sentence 2.
