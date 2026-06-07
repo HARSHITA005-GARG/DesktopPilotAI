@@ -28,7 +28,9 @@ class HybridMemory:
 
         # 3. LLM Setup for Consolidation
         # Point this to your local Ollama instance running the 8B model
-        self.llm = ChatOllama(model="interstellarninja/hermes-2-pro-llama-3-8b", format="json", temperature=0)
+        # 3. LLM Setup for Consolidation
+        # Point this to your local Ollama instance running the 8B model
+        self.llm = ChatOllama(model="llama3.1", format="json", temperature=0)
 
     def _extract_knowledge_with_llm(self, text: str) -> dict:
         """

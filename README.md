@@ -70,7 +70,7 @@ The LLM responsible for reasoning, conversation, and writing code.
 
 * **Model Server:** **Ollama** running inside a Docker container via WSL2.
 * **Hardware Integration:** Docker Desktop must be configured for the WSL2 backend with the NVIDIA Container Toolkit installed, granting the container direct access to the RTX 5060 tensor cores.
-* **Model Selection:** An 8B parameter model fine-tuned for tool calling (e.g., `Hermes-2-Pro-Llama-3-8B`).
+* **Model Selection:** An 8B parameter model fine-tuned for tool calling (e.g., `llama3.1`).
 * **Quantization:** Uses GGUF format. The heaviest layers are loaded into the 8GB VRAM for speed, while the remaining layers are spilled into the 24GB System RAM to prevent VRAM exhaustion.
 
 ### 5. The Execution Sandbox (The Hands)
