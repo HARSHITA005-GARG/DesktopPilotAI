@@ -1,88 +1,99 @@
+import io
+import queue
 import numpy as np
-import pyaudiowpatch as pyaudio
-import torch
+import sounddevice as sd
+from scipy.io import wavfile
 from faster_whisper import WhisperModel
+import webrtcvad
 
 class AcousticEar:
     """
-    The acoustic processing pipeline. 
-    Upgraded for better accent recognition and patient voice activity detection.
+    Robust Automated Speech Capture for Coding.
+    Uses dynamic energy thresholds and generous silence padding to prevent cut-offs.
     """
-    
-    # 1. Increased silence threshold to 1200ms to prevent cutting you off mid-sentence
-    def __init__(self, silence_threshold_ms: int = 1200):
-        self.chunk_size = 512
+    def __init__(self, model_size: str = "base"):
+        print("[Ear] Loading Faster-Whisper Model...")
+        self.stt_model = WhisperModel(model_size, device="cpu", compute_type="int8")
+        print("[Ear] Whisper Model Loaded Successfully on CPU.")
         self.sample_rate = 16000
-        self.silence_threshold_frames = int((self.sample_rate / self.chunk_size) * (silence_threshold_ms / 1000.0))
-        
-        print("[Ear] Loading Faster-Whisper 'small' model (INT8, CPU)...")
-        # 2. Upgraded to 'small.en' for drastically better Indian English accent recognition
-        self.stt_model = WhisperModel("small.en", device="cpu", compute_type="int8")
-        
-        print("[Ear] Loading Silero VAD...")
-        self.vad_model, utils = torch.hub.load(repo_or_dir='snakers4/silero-vad', model='silero_vad')
-        self.get_speech_timestamps = utils[0]
-        
-        self.p = pyaudio.PyAudio()
+        # Configuration tuning for programming pauses
+        self.vad = webrtcvad.Vad(3)
+        self.silence_limit = 1.8  # Allowed pause duration in seconds before processing
+        self.threshold = 500      # Audio amplitude threshold for speech detection
 
-    def listen_and_transcribe(self) -> str:
-        """
-        Waits for the user to speak, patiently waits for them to stop, 
-        and transcribes with high accuracy.
-        """
-        default_mic = self.p.get_default_input_device_info()
-        
-        mic_stream = self.p.open(format=pyaudio.paInt16, channels=1, rate=self.sample_rate, 
-                                 input=True, frames_per_buffer=self.chunk_size, 
-                                 input_device_index=default_mic["index"])
-
-        print("\n[Ear] Listening...")
+    def listen(self, mouth_instance=None) -> str:
+        """Continuously monitors audio and captures a complete block of speech."""
+        print("\n[Ear] Listening... (Go ahead, speak at your own pace)")
         
         audio_buffer = []
-        silence_counter = 0
-        is_speaking = False
+        speech_started = False
+        chunks_of_silence = 0
+        
+        # WebRTC VAD requires 10, 20, or 30ms frames.
+        # 16000Hz * 0.03 seconds = 480 samples per frame
+        frame_duration_ms = 30
+        frame_size = int(self.sample_rate * (frame_duration_ms / 1000.0)) 
+        
+        max_silence_frames = int((self.silence_limit * 1000) / frame_duration_ms)
+        # Synchronous audio capture stream
+        with sd.InputStream(samplerate=self.sample_rate, channels=1, dtype='int16', blocksize=1024) as stream:
+            while True:
+                chunk, _ = stream.read(frame_size)
+                # Convert numpy array to raw bytes for VAD
+                raw_bytes = chunk.tobytes()
+                is_speech = self.vad.is_speech(raw_bytes, self.sample_rate)
 
-        while True:
-            raw_mic_data = mic_stream.read(self.chunk_size, exception_on_overflow=False)
-            mic_array = np.frombuffer(raw_mic_data, dtype=np.int16)
-            
-            # Convert to Float32 tensor for Silero VAD
-            tensor_audio = torch.from_numpy(mic_array.astype(np.float32) / 32768.0)
-            
-            # Voice Activity Detection
-            confidence = self.vad_model(tensor_audio, self.sample_rate).item()
-            
-            if confidence > 0.5:
-                is_speaking = True
-                silence_counter = 0  # Reset the silence counter every time you make a sound
-                audio_buffer.append(mic_array)
-            elif is_speaking:
-                silence_counter += 1
-                audio_buffer.append(mic_array)
-                
-                # If silence exceeds the new 1.2-second threshold, stop capturing
-                if silence_counter > self.silence_threshold_frames:
-                    break
+                if speech_started:
+                    audio_buffer.append(chunk)
+                    if not is_speech:
+                        silence_frames += 1
+                        if silence_frames > max_silence_frames:
+                            print("[Ear] Stop condition met. Transcribing...")
+                            break
+                    else:
+                        silence_frames = 0 
+                else:
+                    if is_speech:
+                        print("[Ear] Voice detected, capturing recording...")
+                        speech_started = True
+                        audio_buffer.append(chunk)
+                        
+                        # --- BARGE-IN LOGIC ---
+                        # If the AI is currently playing audio, stop it immediately!
+                        if mouth_instance and mouth_instance.is_playing:
+                            print("[Ear] Barge-in detected! Cutting off AI...")
+                            mouth_instance.interrupt()
 
-        # Cleanup streams
-        mic_stream.stop_stream()
-        mic_stream.close()
-
-        if len(audio_buffer) == 0:
+        if not audio_buffer:
             return ""
+        print("[Ear] Saved debug_listening_test.wav to your folder. Listen to it!")
+        # 1. First, create the audio_data variable
+        try:
+            audio_data = np.concatenate(audio_buffer, axis=0)
             
-        print("[Ear] Transcribing...")
-        final_audio = np.concatenate(audio_buffer).astype(np.float32) / 32768.0
-        
-        # 3. Added initial_prompt to give the model phonetic context
-        segments, _ = self.stt_model.transcribe(
-            final_audio, 
-            beam_size=5, 
-            language="en",
-            initial_prompt="Hello! I am speaking conversational English. Can you help me with a coding task?"
-        )
-        
-        transcription = "".join([segment.text for segment in segments]).strip()
-        print(f"[Ear] Heard: '{transcription}'")
-        
-        return transcription
+            # 2. NOW we can save it to the hard drive for debugging!
+            wavfile.write("debug_listening_test.wav", self.sample_rate, audio_data)
+            print("[Ear] Saved debug_listening_test.wav to your folder. Listen to it!")
+
+            # 3. Continue with the normal transcription...
+            wav_io = io.BytesIO()
+            wavfile.write(wav_io, self.sample_rate, audio_data)
+            wav_io.seek(0)
+
+            segments, _ = self.stt_model.transcribe(
+                wav_io,
+                beam_size=1,
+                language="en",
+                condition_on_previous_text=False
+            )
+
+            text = "".join([segment.text for segment in segments]).strip()
+            print(f"[Ear] Heard: '{text}'")
+            return text
+            
+        except Exception as e:
+            print(f"[Ear Error] Transcription failure: {e}")
+            return ""
+
+    def close(self):
+        pass

@@ -21,26 +21,21 @@ class MemoryWorker:
         self.worker_thread.start()
 
     def _process_queue(self) -> None:
-        """
-        The continuous loop that runs in the background, waiting for data.
-        """
         print("[Memory Worker] Background thread active and waiting...")
         while True:
             try:
-                # .get() will block and wait here efficiently until an item is added
                 memory_id, raw_text = self.memory_queue.get()
-                
-                # A "poison pill" to gracefully shut down the thread if needed
                 if raw_text is None:
                     break
                 
-                print(f"[Memory Worker] Consolidating memory for ID: {memory_id}...")
-                
-                # Execute the heavy LLM extraction
-                self.db.save_memory(memory_id, raw_text)
-                
-                # Signal that the task is complete
+                # Extract and store in memory, but DO NOT write to disk yet
+                self.db.save_memory(memory_id, raw_text, persist=False)
                 self.memory_queue.task_done()
+                
+                # If the queue is empty, we are done processing the batch. Now write to disk.
+                if self.memory_queue.empty():
+                    print("[Memory Worker] Queue empty. Persisting Knowledge Graph to disk...")
+                    self.db.persist_graph()
                 
             except Exception as e:
                 print(f"[Memory Worker Error] Failed to process memory: {e}")

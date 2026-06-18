@@ -30,62 +30,40 @@ class HybridMemory:
         # Point this to your local Ollama instance running the 8B model
         # 3. LLM Setup for Consolidation
         # Point this to your local Ollama instance running the 8B model
-        self.llm = ChatOllama(model="llama3.1", format="json", temperature=0)
+        self.llm = ChatOllama(model="llama3.2:3b", format="json", temperature=0)
 
     def _extract_knowledge_with_llm(self, text: str) -> dict:
-        """
-        Uses the LLM to strip away conversational noise and extract only concrete facts.
-        Forces the output into a strict JSON schema.
-        """
-        prompt = f"""
-        You are a memory extraction engine. Analyze the following text and extract ONLY permanent preferences, rules, or architectural facts. Ignore conversational filler.
-        Output strictly in JSON format with two lists: "facts" (strings) and "relations" (source, relationship, target).
-        
-        Text: {text}
-        
-        Schema:
-        {{
-            "facts": ["Use pytest for all testing", "Deploy using Docker"],
-            "relations": [
-                {{"source": "Testing", "relationship": "requires", "target": "pytest"}},
-                {{"source": "Deployment", "relationship": "uses", "target": "Docker"}}
-            ]
-        }}
-        """
-        
+        # ... prompt ...
         response = self.llm.invoke([HumanMessage(content=prompt)])
+        
+        # Strip markdown formatting
+        raw_content = response.content.strip()
+        if raw_content.startswith("```json"):
+            raw_content = raw_content[7:-3].strip()
+        elif raw_content.startswith("```"):
+            raw_content = raw_content[3:-3].strip()
+            
         try:
-            return json.loads(response.content)
+            return json.loads(raw_content)
         except json.JSONDecodeError:
+            print(f"[Memory Error] Failed to parse LLM JSON: {raw_content}")
             return {"facts": [], "relations": []}
 
-    def save_memory(self, memory_id: str, raw_text: str) -> None:
-        """
-        Filters raw text through the LLM, then saves to both the Graph and Vector DB.
-        """
+    def save_memory(self, memory_id: str, raw_text: str, persist: bool = True) -> None:
         extracted_data = self._extract_knowledge_with_llm(raw_text)
         
-        # 1. Save to Graph DB (NetworkX)
+        # 1. Save to Graph DB (Memory Only)
         for rel in extracted_data.get("relations", []):
-            source = rel.get("source")
-            target = rel.get("target")
-            relationship = rel.get("relationship")
-            
-            if source and target and relationship:
-                self.graph.add_edge(source, target, label=relationship)
+            if rel.get("source") and rel.get("target") and rel.get("relationship"):
+                self.graph.add_edge(rel["source"], rel["target"], label=rel["relationship"])
                 
-        # Persist the graph to disk
+        # 2. Persist the graph only if requested
+        if persist:
+            self.persist_graph()
+        
+    def persist_graph(self) -> None:
+        """Saves the NetworkX graph to the disk."""
         nx.write_graphml(self.graph, self.graph_path)
-
-        # 2. Save to Vector DB (Chroma)
-        for fact in extracted_data.get("facts", []):
-            embedding = self.embedding_model.encode(fact).tolist()
-            self.vector_collection.add(
-                ids=[f"{memory_id}_{hash(fact)}"],
-                embeddings=[embedding],
-                documents=[fact]
-            )
-            print(f"[Memory Consolidator] Saved Fact: {fact}")
 
     def retrieve_hybrid_context(self, query: str) -> str:
         """
