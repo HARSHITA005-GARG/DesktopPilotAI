@@ -185,12 +185,12 @@ class AcousticMouth:
             self.text_queue.put(text.strip())
 
     def interrupt(self) -> None:
-        """Flush pending speech and cancel the current playback loop."""
+        """Flush pending speech and lock the mouth until the next turn."""
         print("[Mouth] Interrupted! Stopping audio...")
-        self.interrupt_event.set()
-        self._flush_queues()
-        sd.stop()
-        self.interrupt_event.clear()
+        self.interrupt_event.set() # Set the lock
+        sd.stop()                  # Kill current audio
+        self._flush_queues()       # Empty the queues
+        # DO NOT call self.interrupt_event.clear() here anymore!
 
     def _flush_queues(self) -> None:
         while not self.text_queue.empty():

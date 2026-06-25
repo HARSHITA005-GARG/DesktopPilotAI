@@ -1,6 +1,8 @@
+import json
 import os
 import subprocess
 import ast
+import base64
 from datetime import datetime
 from langchain_core.tools import tool
 from langchain_community.tools import DuckDuckGoSearchRun
@@ -8,6 +10,13 @@ import webbrowser
 import urllib.parse
 from docx import Document
 import numexpr
+from playwright.sync_api import sync_playwright
+from bs4 import BeautifulSoup
+import time
+import pyautogui
+import difflib
+
+from langchain_core.messages import HumanMessage
 
 # Define system paths
 WORKSPACE_DIR = os.path.abspath("./AI_Workspace")
@@ -16,6 +25,139 @@ LOG_DIR = os.path.abspath("./logs")
 # Ensure the directories exist
 os.makedirs(WORKSPACE_DIR, exist_ok=True)
 os.makedirs(LOG_DIR, exist_ok=True)
+
+pyautogui.FAILSAFE = True
+
+def safe_scan_shortcuts():
+    """Safely scans Windows directories for shortcut names without throwing errors."""
+    search_paths = [
+        os.path.join(os.environ.get("USERPROFILE", ""), "Desktop"),               
+        r"C:\Users\Public\Desktop",                                      
+        os.path.join(os.environ.get("APPDATA", ""), r"Microsoft\Windows\Start Menu\Programs"), 
+        r"C:\ProgramData\Microsoft\Windows\Start Menu\Programs"          
+    ]
+    
+    shortcut_map = {}
+    for path in search_paths:
+        try:
+            if path and os.path.exists(path):
+                for root, _, files in os.walk(path):
+                    for file in files:
+                        if file.endswith(".lnk"):
+                            try:
+                                name_without_ext = os.path.splitext(file)[0]
+                                shortcut_map[name_without_ext.lower().strip()] = name_without_ext
+                            except Exception:
+                                continue
+        except Exception:
+            continue
+            
+    return shortcut_map
+
+@tool
+def open_application(app_name: str) -> str:
+    """
+    Opens any application by finding its official system name and 
+    typing it dynamically into the Windows Start Menu.
+    """
+    clean_input = app_name.lower().strip()
+    print(f"\n[Tool] Visual open initiated for: '{clean_input}'")
+
+    # 1. Safely gather shortcuts
+    shortcut_map = safe_scan_shortcuts()
+    
+    # 2. Match the name STRICTLY
+    string_to_type = None
+    if clean_input in shortcut_map:
+        string_to_type = shortcut_map[clean_input]
+    else:
+        for clean_name, official_name in shortcut_map.items():
+            if clean_input in clean_name: # E.g., "powerpoint" inside "microsoft powerpoint"
+                string_to_type = official_name
+                break
+        
+        if not string_to_type:
+            # CRITICAL FIX: Cutoff raised to 0.8. No more wild guessing!
+            matches = difflib.get_close_matches(clean_input, list(shortcut_map.keys()), n=1, cutoff=0.8)
+            if matches:
+                string_to_type = shortcut_map[matches[0]]
+
+    # If scanning found nothing (like UWP apps), trust the user's voice completely
+    if not string_to_type:
+        print(f"[Tool] No strong shortcut match found. Trusting voice input...")
+        string_to_type = app_name
+
+    # 3. Execute the visual typing workflow
+    try:
+        print(f"[Tool] Executing visual typing for target: '{string_to_type}'")
+        
+        pyautogui.press("win")
+        time.sleep(0.8) 
+        
+        pyautogui.write(string_to_type, interval=0.06)
+        time.sleep(1.8) 
+        
+        pyautogui.press("enter")
+        return f"Typed and launched {string_to_type}."
+        
+    except Exception as e:
+        return f"Visual fallback failed. Error: {str(e)}"
+        
+# @tool
+# def configure_workspace(layout_preset: str) -> str:
+#     """
+#     Automates the local Windows OS workspace. Launches apps and arranges the screen.
+#     Supported presets:
+#     - 'code': Opens Visual Studio Code, launches Google Chrome, and opens a terminal.
+#     - 'chill': Launches Spotify and a web browser window.
+#     - 'minimize_all': Minimizes all open windows to show the desktop clean.
+#     """
+#     layout_preset = layout_preset.lower().strip()
+#     print(f"\n[Tool] Activating OS Workspace Preset: '{layout_preset}'")
+    
+#     try:
+#         if layout_preset == "minimize_all":
+#             # Simulate Windows Key + D to clear the screen
+#             pyautogui.hotkey("win", "d")
+#             return "Successfully minimized all windows."
+
+#         elif layout_preset == "code":
+#             # 1. Minimize current distractions
+#             pyautogui.hotkey("win", "d")
+#             time.sleep(0.5)
+
+#             # 2. Launch Visual Studio Code (Assuming it's in the system PATH)
+#             print("[Tool] Launching VS Code...")
+#             subprocess.Popen("code", shell=True)
+#             time.sleep(2.0) # Give it a moment to boot
+
+#             # 3. Open Google Chrome
+#             print("[Tool] Launching Google Chrome...")
+#             subprocess.Popen("start chrome", shell=True)
+#             time.sleep(1.5)
+
+#             # 4. Snap Chrome to the right side of the screen using Windows shortcuts
+#             pyautogui.hotkey("win", "right")
+#             time.sleep(0.5)
+            
+#             return "Workspace configured for software development: VS Code and Chrome opened."
+
+#         elif layout_preset == "chill":
+#             # Launch Spotify via Windows URI handler
+#             print("[Tool] Launching Spotify...")
+#             os.system("start spotify:")
+#             time.sleep(2.0)
+            
+#             # Snap it to the left side
+#             pyautogui.hotkey("win", "left")
+            
+#             return "Workspace configured for relaxation: Spotify initiated."
+
+#         else:
+#             return f"Unknown workspace preset: '{layout_preset}'. No actions taken."
+
+#     except Exception as e:
+#         return f"Failed to execute workspace automation. Error: {str(e)}"
 
 @tool
 def update_workspace_file(filename: str, absolute_content: str) -> str:
@@ -60,7 +202,44 @@ def read_local_file(filename: str) -> str:
     except Exception as e:
         return f"System Error - Failed to read file: {str(e)}"
 
+@tool
+def navigate_and_read(url: str) -> str:
+    """
+    Navigates to a specific URL, bypasses basic popups, reads the entire page's 
+    text content, and returns a clean summary. Use this whenever the user asks you 
+    to read a website, check documentation, or summarize an article.
+    """
+    print(f"\n[Tool] Launching browser to navigate to: {url}")
+    try:
+        with sync_playwright() as p:
+            # Launch a headless Chromium browser
+            browser = p.chromium.launch(headless=True)
+            page = browser.new_page()
+            
+            # Go to the URL (15-second timeout so the AI doesn't hang forever)
+            page.goto(url, timeout=15000, wait_until="domcontentloaded")
+            
+            # Grab the raw HTML
+            html_content = page.content()
+            browser.close()
 
+            # Pass the HTML to BeautifulSoup to clean it up
+            soup = BeautifulSoup(html_content, "html.parser")
+            
+            # Destroy headers, footers, scripts, and styles to save tokens
+            for element in soup(["script", "style", "nav", "footer", "header", "aside"]):
+                element.extract()
+            
+            # Extract just the raw, readable text
+            text = soup.get_text(separator="\n", strip=True)
+            
+            # Truncate to ~12,000 characters so we don't blow up the Groq context window
+            clean_text = text[:12000] 
+            
+            return f"Website Content:\n{clean_text}"
+            
+    except Exception as e:
+        return f"Failed to read the website. Error: {str(e)}"
 # Initialize the base search engine
 ddg_search = DuckDuckGoSearchRun()
 

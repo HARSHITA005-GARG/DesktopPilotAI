@@ -1,5 +1,6 @@
 import asyncio
 import contextlib
+from datetime import time
 from dotenv import load_dotenv
 from pathlib import Path
 import os
@@ -13,9 +14,9 @@ import sys
 # Import your Phase 1 modules
 from audio.ear import AcousticEar
 from audio.mouth import AcousticMouth, SentenceBuffer
-from langchain_core.messages import HumanMessage
+from langchain_core.messages import HumanMessage, SystemMessage
 from status_broadcast import StatusBroadcaster
-
+from tools.system_tools import open_application
 
 env_path = Path(__file__).parent / ".env"
 load_dotenv(dotenv_path=env_path)
@@ -27,6 +28,8 @@ TOOL_STATUSES = {
     "run_python_script": "executing docker command",
     "search_web": "searching web",
     "open_chrome_search": "searching web",
+    "navigate_and_read": "reading website",
+    "open_application": "launching application",
     "manage_local_file": "writing file",
     "patch_local_file": "updating file",
     "read_local_file": "reading file",
@@ -69,6 +72,9 @@ async def stream_graph_execution(orchestrator_app, state: dict, mouth=None) -> d
     sentence_buffer = SentenceBuffer()
 
     async for event in orchestrator_app.astream_events(state, version="v2"):
+        if mouth and mouth.interrupt_event.is_set():
+            print("[System] Halting LLM generation due to user barge-in.")
+            break
         status = status_for_graph_event(event)
         if status:
             status_broadcaster.publish(status)
@@ -83,13 +89,16 @@ async def stream_graph_execution(orchestrator_app, state: dict, mouth=None) -> d
         if event.get("event") == "on_chain_end" and not event.get("parent_ids"):    
             final_state = event.get("data", {}).get("output")
 
-    if mouth is not None:
+    if mouth is not None and not mouth.interrupt_event.is_set():
         remainder = sentence_buffer.flush()
         if remainder:
             mouth.queue_text(remainder)
 
     if final_state is None:
+        if mouth and mouth.interrupt_event.is_set():
+            return state 
         raise RuntimeError("LangGraph event stream ended without a final state")
+        
     return final_state
 
 
@@ -105,58 +114,140 @@ class AssistantManager:
         self.ear = AcousticEar() 
         
         self.state = {
-            "messages": []
+            "messages": [
+                SystemMessage(content=(
+                    "You are a highly efficient Desktop Pilot AI. "
+                    "You have access to tools to control the user's computer, execute code, and browse the web. "
+                    "CRITICAL INSTRUCTION: Your spoken responses must be extremely concise. "
+                    "Never explain the tools you are using. Never write long introductory sentences. "
+                    "If asked to open an app, just do it and say 'Opening WhatsApp.' "
+                    "If answering a question, get straight to the point in 1 or 2 short sentences."
+                ))
+            ]
         }
 
     def run_ai_loop(self):
         print("[System] Assistant Online. Awaiting voice input...")
+        import os  # Required for the os._exit(0) command
+        import time
         
-        # 1. Create a persistent event loop for this background thread
-        loop = asyncio.new_event_loop()
-        asyncio.set_event_loop(loop)
-        
-        try:
-            # Inside app/main.py -> run_ai_loop()
-            while not self._stop_event.is_set():
-                # Listen (Blocking)
+        while not self._stop_event.is_set():
+            try:
+                # 1. Force state to listening at the start of every turn
                 status_broadcaster.publish("listening")
                 
-                # FIX: Change from listen_and_transcribe() to listen()
+                # 2. Wipe clean any lingering audio hardware interrupt flags
+                self.mouth.interrupt_event.clear() 
+                
+                # 3. Block and listen for user voice input
                 user_text = self.ear.listen(mouth_instance=self.mouth)
-
+                
                 if self._stop_event.is_set():
                     break
-                if not user_text:
+                    
+                # Smoothly cycle back if input is empty or just whitespace
+                if not user_text or not user_text.strip():
                     continue
 
-                # Think
-                status_broadcaster.publish("thinking")
-                self.state["messages"].append(HumanMessage(content=user_text))
+                print(f"[User Voice Check]: {user_text}")
 
+                # --- 4. THE VOICE KILL SWITCH ---
+                clean_text = user_text.lower().replace(".", "").replace("!", "").replace(",", "").strip()
+                kill_phrases = ["sleep", "shut up", "shut yourself", "shut down", "turn off", "go to sleep"]
+                
+                if any(phrase in clean_text for phrase in kill_phrases):
+                    print(f"\n[System] Voice Kill Switch Activated ('{clean_text}')")
+                    status_broadcaster.publish("idle")
+                    
+                    self.mouth.queue_text("Shutting down systems. Goodbye.")
+                    self.mouth.wait_until_done()
+                    self.close()
+                    os._exit(0) 
+                # --------------------------------
+                # --- 5. THE FAST-LANE APP INTERCEPTOR ---
+                # Bypasses the flaky AI Router completely for instant app launching
+                # if "open " in clean_text or "launch " in clean_text:
+                #     # Isolate the app name (e.g., "can you open microsoft teams for me" -> "microsoft teams")
+                #     words = clean_text.split()
+                #     try:
+                #         cmd_index = words.index("open") if "open" in words else words.index("launch")
+                        
+                #         # Grab everything after the word "open", and clean up polite words
+                #         app_target = " ".join(words[cmd_index+1:]).replace("for me", "").replace("please", "").strip()
+                        
+                #         if app_target:
+                #             print(f"\n[System] Fast-Lane Intercept: Executing tool for '{app_target}'")
+                #             status_broadcaster.publish("executing") 
+                            
+                #             # Import your tool right here (Adjust the import path to match your actual tools file!)
+                #             # For example, if it's in core/tools.py, use: from core.tools import open_application
+                             
+                            
+                #             # Trigger the LangChain tool directly
+                #             open_application.invoke({"app_name": app_target})
+                            
+                #             # Speak the confirmation and skip the AI Router entirely!
+                #             self.mouth.queue_text(f"Opening {app_target}.")
+                #             self.mouth.interrupt_event.clear()
+                #             continue 
+                            
+                #     except ValueError:
+                #         pass # If extraction fails, let it fall through to the AI
+                # # -----------------------------
+                # 5. Clear interrupt flag again right before running reasoning logic
+                self.mouth.interrupt_event.clear()
+
+                # 6. LIFE PATROL: Ensure a perfectly healthy, active event loop for this turn
                 try:
-                    # 2. Use the persistent loop instead of asyncio.run()
-                    final_state = loop.run_until_complete(
-                        stream_graph_execution(
-                            self.orchestrator_app,
-                            self.state,
-                            self.mouth,
-                        )
-                    )
-                except asyncio.CancelledError:
-                    self._stop_event.set()
-                    break
+                    loop = asyncio.get_event_loop()
+                    if loop.is_closed():
+                        loop = asyncio.new_event_loop()
+                        asyncio.set_event_loop(loop)
+                except RuntimeError:
+                    loop = asyncio.new_event_loop()
+                    asyncio.set_event_loop(loop)
 
+                # Set UI status to thinking
+                status_broadcaster.publish("thinking")
+                
+                # 7. Append interaction to conversational memory layout (Last 10 messages)
+                from langchain_core.messages import HumanMessage
+                self.state["messages"].append(HumanMessage(content=user_text))
+                if len(self.state["messages"]) > 10:
+                    self.state["messages"] = self.state["messages"][-10:]
+
+                # 8. Execute graph processing safely within the verified active loop
+                final_state = loop.run_until_complete(
+                    stream_graph_execution(
+                        self.orchestrator_app,
+                        self.state,
+                        self.mouth,
+                    )
+                )
+                
                 self.state = final_state
 
-                if self._stop_event.is_set():
-                    break
-        finally:
-            status_broadcaster.publish("idle")
-            # 3. Clean up the loop
-            loop.close()
-            self.close()
-
+            except Exception as e:
+                # Critical recovery layer catches crashes from tools, audio lines, or sd.stop()
+                print(f"\n[Loop Recovery] Caught exception during active cycle: {str(e)}")
+                print("[Loop Recovery] Resetting audio pipelines and forcing listen state...")
+                
+                # Clear mouth queue and release hardware hooks
+                self.mouth.interrupt_event.clear()
+                while not self.mouth.queue.empty():
+                    try:
+                        self.mouth.queue.get_nowait()
+                        self.mouth.queue.task_done()
+                    except Exception:
+                        break
+                
+                # Yield a fraction of a second for system drivers to settle before looping back
+                time.sleep(0.2)
+                continue  
+            
+              
     def stop(self) -> None:
+        
         self._stop_event.set()
         self.ear.close()
 
